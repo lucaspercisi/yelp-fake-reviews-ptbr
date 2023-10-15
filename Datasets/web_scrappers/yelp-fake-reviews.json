@@ -1,0 +1,175 @@
+{
+  "_id": "yelp-fake-reviews",
+  "startUrl": [
+    "https://www.yelp.com.br/search?find_desc=Bares&find_loc=Salvador%2C+Bahia&sortby=review_count",
+    "https://www.yelp.com.br/search?find_desc=Restaurantes&find_loc=Salvador%2C+Bahia&sortby=review_count",
+    "https://www.yelp.com.br/search?find_desc=Bares&find_loc=Curitiba%2C+Paran%C3%A1&sortby=review_count",
+    "https://www.yelp.com.br/search?find_desc=Restaurantes&find_loc=Curitiba%2C+Paran%C3%A1&sortby=review_count",
+    "https://www.yelp.com.br/search?find_desc=Bares&find_loc=Belo+Horizonte%2C+Minas+Gerais",
+    "https://www.yelp.com.br/search?find_desc=Restaurantes&find_loc=Belo+Horizonte%2C+Minas+Gerais&sortby=review_count https://www.yelp.com.br/search?find_desc=Bares&find_loc=Belo+Horizonte%2C+Minas+Gerais",
+    "https://www.yelp.com.br/search?find_desc=Bares&find_loc=Fortaleza%2C+Cear%C3%A1&sortby=review_count",
+    "https://www.yelp.com.br/search?find_desc=Restaurantes&find_loc=Fortaleza%2C+Cear%C3%A1&sortby=review_count",
+    "https://www.yelp.com.br/search?find_desc=Bares&find_loc=Bras%C3%ADlia%2C+Distrito+Federal&sortby=review_count",
+    "https://www.yelp.com.br/search?find_desc=Restaurantes&find_loc=Bras%C3%ADlia%2C+Distrito+Federal&sortby=review_count",
+    "https://www.yelp.com.br/search?find_desc=Bares&find_loc=Rio+De+Janeiro&sortby=review_count",
+    "https://www.yelp.com.br/search?find_desc=Restaurantes&find_loc=Rio+De+Janeiro&sortby=review_count",
+    "https://www.yelp.com.br/search?find_desc=Bares&find_loc=S%C3%A3o+Paulo+-+SP&sortby=review_count",
+    "https://www.yelp.com.br/search?find_desc=Restaurantes&find_loc=S%C3%A3o+Paulo+-+SP&sortby=review_count"
+  ],
+  "selectors": [
+    {
+      "id": "fake-review-element",
+      "parentSelectors": [
+        "fake-review-element",
+        "fake-review-pagination"
+      ],
+      "type": "SelectorElement",
+      "selector": ".not-recommended-reviews .ylist > li",
+      "multiple": true
+    },
+    {
+      "id": "fake-review-user-name",
+      "parentSelectors": [
+        "fake-review-element"
+      ],
+      "type": "SelectorText",
+      "selector": "span.user-display-name",
+      "multiple": false,
+      "regex": ""
+    },
+    {
+      "id": "fake-review-content",
+      "parentSelectors": [
+        "fake-review-element"
+      ],
+      "type": "SelectorText",
+      "selector": "p",
+      "multiple": false,
+      "regex": ""
+    },
+    {
+      "id": "fake-review-pagination",
+      "parentSelectors": [
+        "fake-review-link-fakeReviews",
+        "fake-review-pagination"
+      ],
+      "paginationType": "linkFromHref",
+      "selector": "a.available-number",
+      "type": "SelectorPagination"
+    },
+    {
+      "id": "fake-review-location",
+      "parentSelectors": [
+        "fake-review-element"
+      ],
+      "type": "SelectorText",
+      "selector": ".user-location b",
+      "multiple": false,
+      "regex": ""
+    },
+    {
+      "id": "fake-review-qtd-friends",
+      "parentSelectors": [
+        "fake-review-element"
+      ],
+      "type": "SelectorText",
+      "selector": ".friend-count b",
+      "multiple": false,
+      "regex": ""
+    },
+    {
+      "id": "fake-review-qtd-reviews",
+      "parentSelectors": [
+        "fake-review-element"
+      ],
+      "type": "SelectorText",
+      "selector": ".review-count b",
+      "multiple": false,
+      "regex": ""
+    },
+    {
+      "id": "fake-review-qtd-photos",
+      "parentSelectors": [
+        "fake-review-element"
+      ],
+      "type": "SelectorText",
+      "selector": ".photo-count b",
+      "multiple": false,
+      "regex": ""
+    },
+    {
+      "id": "fake-review-rating",
+      "parentSelectors": [
+        "fake-review-element"
+      ],
+      "type": "SelectorElementAttribute",
+      "selector": "div.i-stars",
+      "multiple": false,
+      "extractAttribute": "title"
+    },
+    {
+      "id": "fake-review-date",
+      "parentSelectors": [
+        "fake-review-element"
+      ],
+      "type": "SelectorText",
+      "selector": "span.rating-qualifier",
+      "multiple": false,
+      "regex": ""
+    },
+    {
+      "id": "fake-review-user-photo",
+      "parentSelectors": [
+        "fake-review-element"
+      ],
+      "type": "SelectorImage",
+      "selector": "img.photo-box-img",
+      "multiple": false
+    },
+    {
+      "id": "fake-review-store-pagination",
+      "parentSelectors": [
+        "_root"
+      ],
+      "type": "SelectorElementClick",
+      "clickActionType": "real",
+      "clickElementSelector": ".pagination-link-component__09f24__JRiQO div",
+      "clickElementUniquenessType": "uniqueText",
+      "clickType": "clickOnce",
+      "delay": 2000,
+      "discardInitialElements": "discard-when-click-element-exists",
+      "multiple": true,
+      "selector": "div.padding-r3__09f24__eaF7p"
+    },
+    {
+      "id": "fake-review-store-link",
+      "parentSelectors": [
+        "fake-review-store-pagination"
+      ],
+      "type": "SelectorLink",
+      "selector": "a.css-19v1rkv",
+      "multiple": false,
+      "linkType": "linkFromHref"
+    },
+    {
+      "id": "fake-review-link-fakeReviews",
+      "parentSelectors": [
+        "fake-review-store-link"
+      ],
+      "type": "SelectorLink",
+      "selector": "p a.css-182o411",
+      "multiple": false,
+      "linkType": "linkFromHref"
+    },
+    {
+      "id": "fake-review-content-language",
+      "parentSelectors": [
+        "fake-review-element"
+      ],
+      "type": "SelectorHTML",
+      "selector": "div.review-content",
+      "multiple": false,
+      "regex": "<p lang=(\"\\w+\")"
+    }
+  ]
+}
