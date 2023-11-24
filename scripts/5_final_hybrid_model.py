@@ -71,7 +71,7 @@ yelp_df = pd.read_csv(url_dataset)
 # yelp_df['capital_count'] = yelp_df['content'].apply(lambda x: len([c for c in str(x) if c.isupper()]))
 
 # #Contando quantidade de palvras
-# yelp_df['word_count'] = yelp_df['content'].apply(lambda x: len(str(x).split(" ")))
+yelp_df['word_count'] = yelp_df['content'].apply(lambda x: len(str(x).split(" ")))
 
 #limpando conteudo textual
 yelp_df['cleaned_content'] = yelp_df['content'].apply(clean_text)
@@ -178,6 +178,13 @@ classifiers_word2vec = {
     'XGBoost': XGBClassifier(n_jobs=-1, **best_params['Word2Vec']['XGBoost'])
 }
 
+colunas_numericas = {
+    'XGBoost': ['qtd_friends', 'qtd_reviews', 'qtd_photos'],
+    'KNN': ['qtd_reviews', 'qtd_photos'],
+    'Random Forest': ['qtd_friends', 'qtd_reviews', 'qtd_photos'],
+    'Logistic Regression': ['qtd_friends', 'qtd_reviews', 'word_count']
+}
+
 best_ngrams = {
     'TF-IDF_Random Forest': (3, 3),
     'TF-IDF_Logistic Regression': (1, 1),
@@ -210,15 +217,19 @@ def adicionar_ao_csv(dados, caminho_base, vetorizador, classificador):
 # Para vetorizadores TF-IDF e BoW
 for vect_name, classifier_dict in {'TF-IDF': classifiers_tfidf, 'BoW': classifiers_bow}.items():
     for clf_name, classifier in classifier_dict.items():
-        # Selecionando o ngram_range
         ngram_range = best_ngrams[f'{vect_name}_{clf_name}']
-        print(f"Terinando -> {vect_name}, {clf_name}")
-        # Escolhendo o vetorizador
         vectorizer = TfidfVectorizer(ngram_range=ngram_range) if vect_name == 'TF-IDF' else CountVectorizer(ngram_range=ngram_range)
-        X_vect = vectorizer.fit_transform(X)
+
+        # Escolhendo as features numéricas apropriadas
+        colunas_a_incluir = colunas_numericas.get(clf_name, [])
+        X_numeric = yelp_df_sample[colunas_a_incluir].values if colunas_a_incluir else None
+
+        # Transformando o texto e concatenando com as features numéricas
+        X_text = vectorizer.fit_transform(X)
+        X_combined = np.hstack((X_text.toarray(), X_numeric)) if X_numeric is not None else X_text
 
         # Calculando o F1 score médio
-        scores = cross_val_score(classifier, X_vect, y, cv=5, scoring='f1')
+        scores = cross_val_score(classifier, X_combined, y, cv=5, scoring='f1')
         print(f"{vect_name}, {clf_name}: Média F1 Score = {np.mean(scores)}")
         
         # Adicionando ao CSV
@@ -251,10 +262,12 @@ w2v_vect = Word2VecVectorizer(vector_size=100, window=5, min_count=1)
 w2v_vect.fit(X)
 X_transformed = w2v_vect.transform(X)
 
-# Para Word2Vec
+# Para Word2Vec, combinando com features numéricas
 for clf_name, classifier in classifiers_word2vec.items():
-    # Calculando o F1 score médio com os dados transformados pelo Word2Vec
-    scores = cross_val_score(classifier, X_transformed, y, cv=5, scoring='f1')
+    colunas_a_incluir = colunas_numericas.get(clf_name, [])
+    X_numeric = yelp_df_sample[colunas_a_incluir].values if colunas_a_incluir else None
+    X_combined = np.hstack((X_transformed, X_numeric)) if X_numeric is not None else X_transformed
+
+    scores = cross_val_score(classifier, X_combined, y, cv=5, scoring='f1')
     print(f"Word2Vec, {clf_name}: Média F1 Score = {np.mean(scores)}")
-    # Adicionando ao CSV
     adicionar_ao_csv({'Vetorizador': 'Word2Vec', 'Classificador': clf_name, 'F1 Score': np.mean(scores)}, caminho_base, 'Word2Vec', clf_name)
