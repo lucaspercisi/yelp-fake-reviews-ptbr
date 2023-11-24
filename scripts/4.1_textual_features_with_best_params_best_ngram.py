@@ -36,6 +36,7 @@ from sklearn.inspection import permutation_importance
 from sklearn.model_selection import train_test_split
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.model_selection import PredefinedSplit
+from datetime import datetime
 
 nltk.download('stopwords')
 stop_words_pt = set(stopwords.words('portuguese'))

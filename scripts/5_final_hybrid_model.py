@@ -36,6 +36,8 @@ from sklearn.inspection import permutation_importance
 from sklearn.model_selection import train_test_split
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.model_selection import PredefinedSplit
+from scipy.sparse import hstack
+from datetime import datetime
 
 nltk.download('stopwords')
 stop_words_pt = set(stopwords.words('portuguese'))
@@ -218,6 +220,8 @@ def adicionar_ao_csv(dados, caminho_base, vetorizador, classificador):
 for vect_name, classifier_dict in {'TF-IDF': classifiers_tfidf, 'BoW': classifiers_bow}.items():
     for clf_name, classifier in classifier_dict.items():
         ngram_range = best_ngrams[f'{vect_name}_{clf_name}']
+        print(f"Terinando -> {vect_name}, {clf_name}")
+        
         vectorizer = TfidfVectorizer(ngram_range=ngram_range) if vect_name == 'TF-IDF' else CountVectorizer(ngram_range=ngram_range)
 
         # Escolhendo as features numéricas apropriadas
@@ -226,7 +230,7 @@ for vect_name, classifier_dict in {'TF-IDF': classifiers_tfidf, 'BoW': classifie
 
         # Transformando o texto e concatenando com as features numéricas
         X_text = vectorizer.fit_transform(X)
-        X_combined = np.hstack((X_text.toarray(), X_numeric)) if X_numeric is not None else X_text
+        X_combined = hstack((X_text, X_numeric)) if X_numeric is not None else X_text
 
         # Calculando o F1 score médio
         scores = cross_val_score(classifier, X_combined, y, cv=5, scoring='f1')

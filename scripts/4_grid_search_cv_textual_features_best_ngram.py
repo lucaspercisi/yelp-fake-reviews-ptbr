@@ -36,6 +36,7 @@ from sklearn.inspection import permutation_importance
 from sklearn.model_selection import train_test_split
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.model_selection import PredefinedSplit
+from datetime import datetime
 
 nltk.download('stopwords')
 stop_words_pt = set(stopwords.words('portuguese'))
@@ -125,7 +126,7 @@ classifiers_params = {
         'classifier': XGBClassifier(),
         'params': {
             'classifier__n_estimators': [200, 400],
-            'classifier__learning_rate': [0.1, 0.2, 0,4],
+            'classifier__learning_rate': [0.1, 0.2, 0.4],
             'classifier__max_depth': [5, 7, 13]
         }
     }
@@ -148,55 +149,55 @@ vectorizers = {
 }
 
 # Repetindo o processo para os outros vetorizadores (TF-IDF e BoW)
-for vect_name in ['TF-IDF', 'BoW']:
-    for clf_name in classifiers_params:
-        ngram_range = best_ngrams[f'{vect_name}_{clf_name}']
-
-        if vect_name == 'TF-IDF':
-            vectorizer = TfidfVectorizer(ngram_range=ngram_range)
-        else:  # BoW
-            vectorizer = CountVectorizer(ngram_range=ngram_range)
-
-        X_combined_vect = vectorizer.fit_transform(X_combined)
-
-        print(f"Iniciando GridSearchCV para {vect_name} com {clf_name}")
-        pipeline = Pipeline([
-            ('classifier', classifiers_params[clf_name]['classifier'])
-        ])
-
-        grid_search = GridSearchCV(pipeline, classifiers_params[clf_name]['params'], cv=ps, scoring=make_scorer(f1_score), verbose=1)
-        grid_search.fit(X_combined_vect, y_combined)
-
-        best_params = grid_search.best_params_
-        best_score = grid_search.score(X_combined_vect[len(X_train):], y_test)  # Avaliando no conjunto de teste
-
-        print(f"Vetorizador: {vect_name}, Classificador: {clf_name}, Melhores parâmetros: {best_params}, Melhor F1 score no teste: {best_score}")
-# cv = StratifiedKFold(n_splits=5)
-# best_results  = {}
-
 # for vect_name in ['TF-IDF', 'BoW']:
 #     for clf_name in classifiers_params:
-#         # Selecionando o ngram_range com base no vetorizador e classificador
 #         ngram_range = best_ngrams[f'{vect_name}_{clf_name}']
 
-#         # Escolhendo o vetorizador apropriado
 #         if vect_name == 'TF-IDF':
 #             vectorizer = TfidfVectorizer(ngram_range=ngram_range)
 #         else:  # BoW
 #             vectorizer = CountVectorizer(ngram_range=ngram_range)
 
+#         X_combined_vect = vectorizer.fit_transform(X_combined)
+
 #         print(f"Iniciando GridSearchCV para {vect_name} com {clf_name}")
 #         pipeline = Pipeline([
-#             ('vectorizer', vectorizer),
 #             ('classifier', classifiers_params[clf_name]['classifier'])
 #         ])
 
-#         # Configurando e executando o GridSearchCV
-#         grid_search = GridSearchCV(pipeline, classifiers_params[clf_name]['params'], cv=cv, scoring=make_scorer(f1_score), verbose=1)
-#         grid_search.fit(X, y)
+#         grid_search = GridSearchCV(pipeline, classifiers_params[clf_name]['params'], cv=ps, scoring=make_scorer(f1_score), verbose=1)
+#         grid_search.fit(X_combined_vect, y_combined)
 
-#         # Imprimindo os resultados
-#         print(f"Vetorizador: {vect_name}, Classificador: {clf_name}, Melhores parâmetros: {grid_search.best_params_}, Melhor F1 score: {grid_search.best_score_}")
+#         best_params = grid_search.best_params_
+#         best_score = grid_search.score(X_combined_vect[len(X_train):], y_test)  # Avaliando no conjunto de teste
+
+#         print(f"Vetorizador: {vect_name}, Classificador: {clf_name}, Melhores parâmetros: {best_params}, Melhor F1 score no teste: {best_score}")
+cv = StratifiedKFold(n_splits=5)
+best_results  = {}
+
+for vect_name in ['TF-IDF', 'BoW']:
+    for clf_name in classifiers_params:
+        # Selecionando o ngram_range com base no vetorizador e classificador
+        ngram_range = best_ngrams[f'{vect_name}_{clf_name}']
+
+        # Escolhendo o vetorizador apropriado
+        if vect_name == 'TF-IDF':
+            vectorizer = TfidfVectorizer(ngram_range=ngram_range)
+        else:  # BoW
+            vectorizer = CountVectorizer(ngram_range=ngram_range)
+
+        print(f"Iniciando GridSearchCV para {vect_name} com {clf_name}")
+        pipeline = Pipeline([
+            ('vectorizer', vectorizer),
+            ('classifier', classifiers_params[clf_name]['classifier'])
+        ])
+
+        # Configurando e executando o GridSearchCV
+        grid_search = GridSearchCV(pipeline, classifiers_params[clf_name]['params'], cv=cv, scoring=make_scorer(f1_score), verbose=1)
+        grid_search.fit(X, y)
+
+        # Imprimindo os resultados
+        print(f"Vetorizador: {vect_name}, Classificador: {clf_name}, Melhores parâmetros: {grid_search.best_params_}, Melhor F1 score: {grid_search.best_score_}")
         
 # Função para processar o texto e treinar o modelo Word2Vec
 class Word2VecVectorizer(BaseEstimator, TransformerMixin):
@@ -238,33 +239,33 @@ for clf_name, data in classifiers_params.items():
     print(f"{clf_name} parameters: {data['params']}")
 
 # Loop para executar o GridSearchCV para cada classificador
-# for clf_name, data in classifiers_params.items():
-#     print(f"Iniciando GridSearchCV para {clf_name} com Word2Vec")
-
-#     # Criando o modelo e o GridSearchCV
-#     classifier = data['classifier']
-#     grid_search = GridSearchCV(classifier, data['params'], cv=cv, scoring=make_scorer(f1_score), verbose=1)
-
-#     # Ajuste do GridSearchCV ao conjunto de dados transformados pelo Word2Vec
-#     grid_search.fit(X_transformed, y)
-
-#     # Exibindo os melhores parâmetros e o melhor score F1
-#     print(f"Classificador: {clf_name}, Melhores parâmetros: {grid_search.best_params_}, Melhor F1 score: {grid_search.best_score_} com Word2Vec")
-
-# Loop para executar o GridSearchCV para cada classificador
 for clf_name, data in classifiers_params.items():
     print(f"Iniciando GridSearchCV para {clf_name} com Word2Vec")
 
+    # Criando o modelo e o GridSearchCV
     classifier = data['classifier']
-    grid_search = GridSearchCV(classifier, data['params'], cv=ps, scoring=make_scorer(f1_score), verbose=1)
+    grid_search = GridSearchCV(classifier, data['params'], cv=cv, scoring=make_scorer(f1_score), verbose=1)
 
     # Ajuste do GridSearchCV ao conjunto de dados transformados pelo Word2Vec
-    grid_search.fit(X_combined_transformed, y_combined)
+    grid_search.fit(X_transformed, y)
 
-    # Melhores parâmetros e score F1 no conjunto de teste
-    best_params = grid_search.best_params_
-    best_score = grid_search.score(X_test_transformed, y_test)
+    # Exibindo os melhores parâmetros e o melhor score F1
+    print(f"Classificador: {clf_name}, Melhores parâmetros: {grid_search.best_params_}, Melhor F1 score: {grid_search.best_score_} com Word2Vec")
 
-    print(f"Classificador: {clf_name}, Melhores parâmetros: {best_params}, Melhor F1 score no teste: {best_score}")
+# Loop para executar o GridSearchCV para cada classificador
+# for clf_name, data in classifiers_params.items():
+#     print(f"Iniciando GridSearchCV para {clf_name} com Word2Vec")
+
+#     classifier = data['classifier']
+#     grid_search = GridSearchCV(classifier, data['params'], cv=ps, scoring=make_scorer(f1_score), verbose=1)
+
+#     # Ajuste do GridSearchCV ao conjunto de dados transformados pelo Word2Vec
+#     grid_search.fit(X_combined_transformed, y_combined)
+
+#     # Melhores parâmetros e score F1 no conjunto de teste
+#     best_params = grid_search.best_params_
+#     best_score = grid_search.score(X_test_transformed, y_test)
+
+#     print(f"Classificador: {clf_name}, Melhores parâmetros: {best_params}, Melhor F1 score no teste: {best_score}")
     
     
