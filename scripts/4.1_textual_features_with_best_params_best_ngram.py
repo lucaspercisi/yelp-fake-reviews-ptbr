@@ -105,9 +105,9 @@ best_params = {
             'weights': 'uniform'
         },
         'XGBoost': {
-            'learning_rate': 4,
-            'max_depth': 5,
-            'n_estimators': 200
+            'learning_rate': 0.1,
+            'max_depth': 7,
+            'n_estimators': 400
         }
     },
     'BoW': {
@@ -128,7 +128,7 @@ best_params = {
             'weights': 'uniform'
         },
         'XGBoost': {
-            'learning_rate': 0.2,
+            'learning_rate': 0.1,
             'max_depth': 7,
             'n_estimators': 400
         }
@@ -151,9 +151,9 @@ best_params = {
             'weights': 'uniform'
         },
         'XGBoost': {
-            'learning_rate': 0.2,
-            'max_depth': 5,
-            'n_estimators': 200
+            'learning_rate': 0.1,
+            'max_depth': 7,
+            'n_estimators': 400
         }
     }
 }
