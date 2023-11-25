@@ -30,7 +30,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from xgboost import XGBClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from string import punctuation
-from sklearn.metrics import make_scorer, f1_score
+from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.inspection import permutation_importance
 from sklearn.model_selection import train_test_split
@@ -38,6 +38,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.model_selection import PredefinedSplit
 from scipy.sparse import hstack
 from datetime import datetime
+from sklearn.model_selection import cross_validate
 
 nltk.download('stopwords')
 stop_words_pt = set(stopwords.words('portuguese'))
@@ -81,9 +82,9 @@ yelp_df['cleaned_content'] = yelp_df['content'].apply(clean_text)
 #limpando conteudo textual com tag gramtical e convertendo para string
 yelp_df['cleaned_content_tagged'] = yelp_df['content_tagged'].apply(extract_words_from_tagged_content)
 
-# yelp_df_sample = yelp_df.groupby('fake_review').sample(frac=0.50, random_state=42)
+# yelp_df_sample = yelp_df.groupby('fake_review').sample(frac=0.1, random_state=42)
 yelp_df_sample = yelp_df.copy()
-X = yelp_df_sample['cleaned_content']
+X = yelp_df_sample['cleaned_content_tagged']
 y = yelp_df_sample['fake_review'].values
 
 
@@ -97,7 +98,7 @@ best_params = {
         },
         'Logistic Regression': {
             'C': 10,
-            'max_iter': 10,
+            'max_iter': 300,
             'solver': 'lbfgs'
         },
         'KNN': {
@@ -106,7 +107,7 @@ best_params = {
             'weights': 'uniform'
         },
         'XGBoost': {
-            'learning_rate': 4,
+            'learning_rate': 0.2,
             'max_depth': 5,
             'n_estimators': 200
         }
@@ -203,8 +204,75 @@ vectorizers = {
     'BoW': CountVectorizer()
 }
 
+results_df_global = pd.DataFrame(columns=[
+    'classifier', 'vectorizer', 'features_used', 'accuracy_mean', 
+    'accuracy_variance', 'accuracy_min', 'accuracy_max', 
+    'precision_mean', 'precision_variance', 'precision_min', 'precision_max', 
+    'recall_mean', 'recall_variance', 'recall_min', 'recall_max', 
+    'f1_score_mean', 'f1_score_variance', 'f1_score_min', 'f1_score_max'
+])
+
+# scorers = {
+#     'accuracy': make_scorer(accuracy_score),
+#     'precision': make_scorer(precision_score),
+#     'recall': make_scorer(recall_score),
+#     'f1_score': make_scorer(f1_score)
+# }
+
 # Caminho base para salvar os arquivos CSV
 caminho_base = 'C:/Users/lucas/Documents/Projetos/yelp-fake-reviews-ptbr/Results/spyder'
+
+# Função para executar o classificador com um número reduzido de features e salvar os resultados
+def run_and_save_results(clf, X, y, classifier_name, vectorizer, results_df, features_useds):
+    
+    scorers = {
+        'accuracy': 'accuracy',
+        'precision': 'precision',
+        'recall': 'recall',
+        'f1_score': 'f1',
+        'roc_auc': 'roc_auc'
+    }
+    
+    # cv_results = cross_val_score(clf, X, y, cv=5, scoring='scorers', return_train_score=False)
+    cv_results = cross_validate(clf, X, y, cv=5, scoring=scorers, return_train_score=False)
+
+    # Preparando os resultados
+    features_used = ', '.join(features_useds.columns)
+    results = {
+        'classifier': classifier_name,
+        'vectorizer': vectorizer,
+        'features_used': features_used,
+        'accuracy_mean': np.mean(cv_results['test_accuracy']),
+        'accuracy_variance': np.var(cv_results['test_accuracy'], ddof=1),
+        'accuracy_min': np.min(cv_results['test_accuracy']),
+        'accuracy_max': np.max(cv_results['test_accuracy']),
+        'precision_mean': np.mean(cv_results['test_precision']),
+        'precision_variance': np.var(cv_results['test_precision'], ddof=1),
+        'precision_min': np.min(cv_results['test_precision']),
+        'precision_max': np.max(cv_results['test_precision']),
+        'recall_mean': np.mean(cv_results['test_recall']),
+        'recall_variance': np.var(cv_results['test_recall'], ddof=1),
+        'recall_min': np.min(cv_results['test_recall']),
+        'recall_max': np.max(cv_results['test_recall']),
+        'f1_score_mean': np.mean(cv_results['test_f1_score']),
+        'f1_score_variance': np.var(cv_results['test_f1_score'], ddof=1),
+        'f1_score_min': np.min(cv_results['test_f1_score']),
+        'f1_score_max': np.max(cv_results['test_f1_score']),
+        'roc_auc_mean': np.mean(cv_results['test_roc_auc']),
+        'roc_auc_variance': np.var(cv_results['test_roc_auc'], ddof=1),
+        'roc_auc_min': np.min(cv_results['test_roc_auc']),
+        'roc_auc_max': np.max(cv_results['test_roc_auc'])
+    }
+
+    # Adicionando ao dataframe de resultados
+    updated_results_df = pd.concat([results_df, pd.DataFrame([results])], axis=0, ignore_index=True)
+
+    agora = datetime.now().strftime("%Y%m%d_%H%M%S")
+    nome_arquivo = f"{caminho_base}/resultados_{vectorizer}_{classifier_name}_{agora}.csv"
+    
+    updated_results_df.to_csv(nome_arquivo, index=False)
+    
+    return updated_results_df
 
 # Função para adicionar resultados ao CSV com nome de arquivo dinâmico
 def adicionar_ao_csv(dados, caminho_base, vetorizador, classificador):
@@ -216,12 +284,32 @@ def adicionar_ao_csv(dados, caminho_base, vetorizador, classificador):
     df_temp.to_csv(nome_arquivo, index=False)
 
 
-# Para vetorizadores TF-IDF e BoW
+# # Para vetorizadores TF-IDF e BoW
+# for vect_name, classifier_dict in {'TF-IDF': classifiers_tfidf, 'BoW': classifiers_bow}.items():
+#     for clf_name, classifier in classifier_dict.items():
+#         ngram_range = best_ngrams[f'{vect_name}_{clf_name}']
+#         print(f"Terinando -> {vect_name}, {clf_name}")
+        
+#         vectorizer = TfidfVectorizer(ngram_range=ngram_range) if vect_name == 'TF-IDF' else CountVectorizer(ngram_range=ngram_range)
+
+#         # Escolhendo as features numéricas apropriadas
+#         colunas_a_incluir = colunas_numericas.get(clf_name, [])
+#         X_numeric = yelp_df_sample[colunas_a_incluir].values if colunas_a_incluir else None
+
+#         # Transformando o texto e concatenando com as features numéricas
+#         X_text = vectorizer.fit_transform(X)
+#         X_combined = hstack((X_text, X_numeric)) if X_numeric is not None else X_text
+
+#         # Calculando o F1 score médio
+#         scores = cross_val_score(classifier, X_combined, y, cv=5, scoring='f1')
+#         print(f"{vect_name}, {clf_name}: Média F1 Score = {np.mean(scores)}")
+
 for vect_name, classifier_dict in {'TF-IDF': classifiers_tfidf, 'BoW': classifiers_bow}.items():
     for clf_name, classifier in classifier_dict.items():
+        print(f"Iniciando -> {vect_name}, {clf_name}")
+
+        # Configurando o vetorizador
         ngram_range = best_ngrams[f'{vect_name}_{clf_name}']
-        print(f"Terinando -> {vect_name}, {clf_name}")
-        
         vectorizer = TfidfVectorizer(ngram_range=ngram_range) if vect_name == 'TF-IDF' else CountVectorizer(ngram_range=ngram_range)
 
         # Escolhendo as features numéricas apropriadas
@@ -232,12 +320,12 @@ for vect_name, classifier_dict in {'TF-IDF': classifiers_tfidf, 'BoW': classifie
         X_text = vectorizer.fit_transform(X)
         X_combined = hstack((X_text, X_numeric)) if X_numeric is not None else X_text
 
-        # Calculando o F1 score médio
-        scores = cross_val_score(classifier, X_combined, y, cv=5, scoring='f1')
-        print(f"{vect_name}, {clf_name}: Média F1 Score = {np.mean(scores)}")
-        
-        # Adicionando ao CSV
-        adicionar_ao_csv({'Vetorizador': vect_name, 'Classificador': clf_name, 'F1 Score': np.mean(scores)}, caminho_base, vect_name, clf_name)
+        # Executando o classificador e salvando os resultados
+        features_used = pd.DataFrame(X_numeric, columns=colunas_a_incluir)
+        results_df_global = run_and_save_results(classifier, X_combined, y, clf_name, vect_name, results_df_global, features_used)
+
+        f1_score_atual = results_df_global[(results_df_global['classifier'] == clf_name) & (results_df_global['vectorizer'] == vect_name)]['f1_score_mean'].iloc[-1]
+        print(f"F1 Score para {vect_name} e {clf_name}: {f1_score_atual}")
 
 
 # Função para processar o texto e treinar o modelo Word2Vec
@@ -262,16 +350,37 @@ class Word2VecVectorizer(BaseEstimator, TransformerMixin):
             for words in [sentence.split() for sentence in X]
         ])
     
+# w2v_vect = Word2VecVectorizer(vector_size=100, window=5, min_count=1)
+# w2v_vect.fit(X)
+# X_transformed = w2v_vect.transform(X)
+
+# # Para Word2Vec, combinando com features numéricas
+# for clf_name, classifier in classifiers_word2vec.items():
+#     colunas_a_incluir = colunas_numericas.get(clf_name, [])
+#     X_numeric = yelp_df_sample[colunas_a_incluir].values if colunas_a_incluir else None
+#     X_combined = np.hstack((X_transformed, X_numeric)) if X_numeric is not None else X_transformed
+
+#     scores = cross_val_score(classifier, X_combined, y, cv=5, scoring='f1')
+#     print(f"Word2Vec, {clf_name}: Média F1 Score = {np.mean(scores)}")
+#     adicionar_ao_csv({'Vetorizador': 'Word2Vec', 'Classificador': clf_name, 'F1 Score': np.mean(scores)}, caminho_base, 'Word2Vec', clf_name)
+
 w2v_vect = Word2VecVectorizer(vector_size=100, window=5, min_count=1)
 w2v_vect.fit(X)
 X_transformed = w2v_vect.transform(X)
 
 # Para Word2Vec, combinando com features numéricas
 for clf_name, classifier in classifiers_word2vec.items():
+    print(f"Iniciando Word2Vec, {clf_name}")
+
+    # Escolhendo as features numéricas apropriadas
     colunas_a_incluir = colunas_numericas.get(clf_name, [])
     X_numeric = yelp_df_sample[colunas_a_incluir].values if colunas_a_incluir else None
     X_combined = np.hstack((X_transformed, X_numeric)) if X_numeric is not None else X_transformed
 
-    scores = cross_val_score(classifier, X_combined, y, cv=5, scoring='f1')
-    print(f"Word2Vec, {clf_name}: Média F1 Score = {np.mean(scores)}")
-    adicionar_ao_csv({'Vetorizador': 'Word2Vec', 'Classificador': clf_name, 'F1 Score': np.mean(scores)}, caminho_base, 'Word2Vec', clf_name)
+    # Executando o classificador e salvando os resultados
+    features_used = pd.DataFrame(X_numeric, columns=colunas_a_incluir)
+    results_df_global = run_and_save_results(classifier, X_combined, y, clf_name, 'Word2Vec', results_df_global, features_used)
+    
+    f1_score_atual = results_df_global[(results_df_global['classifier'] == clf_name) & (results_df_global['vectorizer'] == 'Word2Vec')]['f1_score_mean'].iloc[-1]
+    print(f"F1 Score para Word2Vec e {clf_name}: {f1_score_atual}")
+

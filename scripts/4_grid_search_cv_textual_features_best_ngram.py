@@ -109,7 +109,7 @@ classifiers_params = {
     'Logistic Regression': {
         'classifier': LogisticRegression(),
         'params': {
-            'classifier__max_iter': [10, 100, 1000],
+            'classifier__max_iter': [100, 1000, 2000],
             'classifier__C': [0.1, 1, 10],
             'classifier__solver': ['newton-cg', 'lbfgs']
         }
