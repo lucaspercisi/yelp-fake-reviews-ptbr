@@ -136,7 +136,7 @@ classifiers = {
     'SVC': SVC(**best_params['SVC'])
 }
 
-cv = StratifiedKFold(n_splits=5, random_state=42)
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
 best_features_set = {}
 

@@ -133,7 +133,7 @@ param_grid = {
     
 }
 
-cv = StratifiedKFold(n_splits=5, random_state=42)
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
 best_models = {}
 

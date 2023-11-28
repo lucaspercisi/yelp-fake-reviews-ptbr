@@ -111,7 +111,7 @@ vectorizers = {
     'BoW': CountVectorizer()
 }
 
-cv = StratifiedKFold(n_splits=5, random_state=42)
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 best_results  = {}
 
 for vect_name, vectorizer in vectorizers.items():
