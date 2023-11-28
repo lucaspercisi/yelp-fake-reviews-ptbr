@@ -100,7 +100,7 @@ best_params = {
     'Random Forest': {
         'n_estimators': 1000, 
         'max_depth': None,
-        'min_samples_split': 2
+        'min_samples_split': 2,
         'min_samples_leaf': 1
     },
     'Logistic Regression': {
@@ -111,18 +111,18 @@ best_params = {
     },
     'KNN': {
         'n_neighbors': 17,
-        'weights': 'distance'
+        'weights': 'distance',
         'metric': 'manhattan',
         'p': 1 
     },
     'XGBoost': {
         'learning_rate': 0.01,
-        'n_estimators': 500
+        'n_estimators': 500,
         'max_depth': 11
     },
     'SVC': {
         'C': 0.1
-        'kernel': 'sigmoid'
+        'kernel': 'sigmoid',
         'gamma': 'scale', 
         'max_iter': 1000
     }
