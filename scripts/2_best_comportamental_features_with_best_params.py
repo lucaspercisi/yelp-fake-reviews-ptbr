@@ -98,10 +98,10 @@ y = yelp_df_sample['fake_review'].values
 
 best_params = {
     'Random Forest': {
-        'n_estimators': 1000,
+        'n_estimators': 1000, 
         'max_depth': None,
-        'min_samples_split': 3,
-        'min_samples_leaf': 2
+        'min_samples_split': 2
+        'min_samples_leaf': 1
     },
     'Logistic Regression': {
         'C': 500,
@@ -111,20 +111,20 @@ best_params = {
     },
     'KNN': {
         'n_neighbors': 17,
-        'weights': 'uniform',
+        'weights': 'distance'
         'metric': 'manhattan',
-        'p': 1  # Parâmetro de potência para a métrica Minkowski
+        'p': 1 
     },
     'XGBoost': {
         'learning_rate': 0.01,
-        'n_estimators': 1000,
-        'max_depth': 7
+        'n_estimators': 500
+        'max_depth': 11
     },
     'SVC': {
-        'C': 10,
-        'kernel': 'rbf',
-        'gamma': 'scale',
-        'max_iter': 10000
+        'C': 0.1
+        'kernel': 'sigmoid'
+        'gamma': 'scale', 
+        'max_iter': 1000
     }
 }
 
