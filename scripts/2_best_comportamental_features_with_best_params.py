@@ -136,7 +136,7 @@ classifiers = {
     'SVC': SVC(**best_params['SVC'])
 }
 
-cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+cv = StratifiedKFold(n_splits=5, random_state=42)
 
 best_features_set = {}
 
@@ -166,7 +166,7 @@ for classifier_name, classifier in classifiers.items():
 
         # Remover a feature menos importante e reavaliar o desempenho
         features_to_test.remove(least_important_feature)
-        mean_f1_score = np.mean(cross_val_score(classifier, X[features_to_test], y, cv=cv, scoring='f1'))
+        mean_f1_score = np.mean(cross_val_score(classifier, X[features_to_test], y, cv=cv, scoring='f1', verbose=2))
 
         # Atualizar o melhor conjunto de features
         if mean_f1_score > best_f1_score:

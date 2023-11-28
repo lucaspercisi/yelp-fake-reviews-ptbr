@@ -181,7 +181,7 @@ vectorizers = {
 }
 
 
-cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+cv = StratifiedKFold(n_splits=5, random_state=42)
 best_results  = {}
 
 for vect_name in ['TF-IDF', 'BoW']:
@@ -202,7 +202,7 @@ for vect_name in ['TF-IDF', 'BoW']:
         ])
 
         # Configurando e executando o GridSearchCV
-        grid_search = GridSearchCV(pipeline, classifiers_params[clf_name]['params'], cv=cv, scoring=make_scorer(f1_score), verbose=1)
+        grid_search = GridSearchCV(pipeline, classifiers_params[clf_name]['params'], cv=cv, scoring=make_scorer(f1_score), verbose=2)
         grid_search.fit(X, y)
 
         # Imprimindo os resultados
@@ -254,7 +254,7 @@ for clf_name, data in classifiers_params.items():
 
     # Criando o modelo e o GridSearchCV
     classifier = data['classifier']
-    grid_search = GridSearchCV(classifier, data['params'], cv=cv, scoring=make_scorer(f1_score), verbose=1)
+    grid_search = GridSearchCV(classifier, data['params'], cv=cv, scoring=make_scorer(f1_score), verbose=2)
 
     # Ajuste do GridSearchCV ao conjunto de dados transformados pelo Word2Vec
     grid_search.fit(X_transformed, y)

@@ -133,7 +133,7 @@ param_grid = {
     
 }
 
-cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+cv = StratifiedKFold(n_splits=5, random_state=42)
 
 best_models = {}
 
@@ -146,7 +146,7 @@ for classifier_name, parameters in param_grid.items():
     ])
 
     try:
-        grid_search = GridSearchCV(pipeline, parameters, cv=cv, scoring=make_scorer(f1_score), verbose=1)
+        grid_search = GridSearchCV(pipeline, parameters, cv=cv, scoring=make_scorer(f1_score), verbose=2)
         grid_search.fit(X, y)
 
         best_models[classifier_name] = {

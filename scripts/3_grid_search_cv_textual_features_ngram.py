@@ -111,7 +111,7 @@ vectorizers = {
     'BoW': CountVectorizer()
 }
 
-cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+cv = StratifiedKFold(n_splits=5, random_state=42)
 best_results  = {}
 
 for vect_name, vectorizer in vectorizers.items():
@@ -128,7 +128,7 @@ for vect_name, vectorizer in vectorizers.items():
             'vectorizer__ngram_range': n_grams
         }
 
-        grid_search = GridSearchCV(pipeline, params, cv=cv, scoring=make_scorer(f1_score), verbose=1)
+        grid_search = GridSearchCV(pipeline, params, cv=cv, scoring=make_scorer(f1_score), verbose=2)
 
         # Ajuste do GridSearchCV ao seu conjunto de dados textual
         # Substitua X_text e y pelos seus dados
