@@ -72,43 +72,71 @@ yelp_df['word_count'] = yelp_df['content'].apply(lambda x: len(str(x).split(" ")
 # yelp_df['cleaned_content_tagged'] = yelp_df['content_tagged'].apply(extract_words_from_tagged_content)
 
 # yelp_df_sample = yelp_df.groupby('fake_review').sample(frac=0.50, random_state=42)
-yelp_df_sample = yelp_df.copy()
+
+
+# Separando o DataFrame por classe
+df_falsos = yelp_df[yelp_df['fake_review'] == False]
+df_verdadeiros = yelp_df[yelp_df['fake_review'] == True]
+
+# Contando o número de registros em cada classe
+num_falsos = df_falsos.shape[0]
+num_verdadeiros = df_verdadeiros.shape[0]
+
+# Amostrando aleatoriamente da classe com mais registros
+if num_falsos > num_verdadeiros:
+    df_falsos = df_falsos.sample(num_verdadeiros, random_state=42)  # Usando um estado aleatório para reprodutibilidade
+else:
+    df_verdadeiros = df_verdadeiros.sample(num_falsos, random_state=42)
+
+yelp_df_balanceado = pd.concat([df_falsos, df_verdadeiros])
+yelp_df_sample = yelp_df_balanceado.copy()
+# yelp_df_sample = yelp_df.copy()
 
 X = yelp_df_sample[['qtd_friends', 'qtd_reviews', 'qtd_photos',	'rating', 'user_has_photo', 'punctuation_count', 'capital_count', 'word_count']]
 y = yelp_df_sample['fake_review'].values  
 
 param_grid = {
     'Random Forest': {
-        'classifier': [RandomForestClassifier()],
-        'classifier__n_estimators': [100, 200],
-        'classifier__max_depth': [None, 100],
-        'classifier__min_samples_split': [2, 3, 5],
-        'classifier__min_samples_leaf': [1]
+        'classifier': [RandomForestClassifier(n_jobs=-1)],
+        'classifier__n_estimators': [None, 100, 200, 1000],
+        'classifier__max_depth': [None, 50, 100],
+        'classifier__min_samples_split': [0, 1, 2, 10],
+        'classifier__min_samples_leaf': [0, 1, 10]
     },
     'Logistic Regression': {
         'classifier': [LogisticRegression()],
-        'classifier__C': [100, 200, 300],
+        'classifier__C': [500, 1000, 2000, 5000],
         'classifier__penalty': ['l2'],
-        'classifier__solver': ['newton-cg']
+        'classifier__solver': ['newton-cg'],
+        'classifier__l1_ratio': [None, 0.5]  # Usado apenas se penalty='elasticnet'
     },
     'KNN': {
-        'classifier': [KNeighborsClassifier()],
-        'classifier__n_neighbors': [3, 5, 11, 13],
-        'classifier__weights': ['uniform'],
-        'classifier__metric': ['manhattan']
+        'classifier': [KNeighborsClassifier(n_jobs=-1)],
+        'classifier__n_neighbors': [3, 5, 13, 17],
+        'classifier__weights': ['uniform', 'distance'],
+        'classifier__metric': ['euclidean', 'manhattan', 'minkowski'],
+        'classifier__p': [1, 2]  # Parâmetro de potência para a métrica Minkowski
     },
     'XGBoost': {
-        'classifier': [XGBClassifier()],
+        'classifier': [XGBClassifier(n_jobs=-1)],
         'classifier__learning_rate': [0.01, 0.005, 0.001],
         'classifier__n_estimators': [500, 1000, 1500],
         'classifier__max_depth': [7, 11, 15, 27]
+    },
+    'SVC': {
+        'classifier': [SVC()],
+        'classifier__C': [0.1, 1, 10, 100],
+        'classifier__kernel': ['rbf', 'poly', 'sigmoid'],
+        'classifier__gamma': ['scale', 'auto'],
+        'classifier__max_iter': [10, 100, 1000, 1000] 
     }
+    
 }
 
-cv = StratifiedKFold(n_splits=5)
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
-# Criando o loop para cada classificador
 best_models = {}
+
 for classifier_name, parameters in param_grid.items():
     print(f"Iniciando GridSearchCV para {classifier_name}")
 
@@ -117,12 +145,20 @@ for classifier_name, parameters in param_grid.items():
         ('classifier', parameters['classifier'][0])
     ])
 
-    grid_search = GridSearchCV(pipeline, parameters, cv=cv, scoring=make_scorer(f1_score), verbose=1)
-    
-    # Substitua X e y pelos seus dados
-    grid_search.fit(X, y)
+    try:
+        grid_search = GridSearchCV(pipeline, parameters, cv=cv, scoring=make_scorer(f1_score), verbose=1)
+        grid_search.fit(X, y)
 
-    print(f"GridSearchCV concluído para {classifier_name}")
-    print(f"Melhores parâmetros para {classifier_name}: {grid_search.best_params_}")
-    print(f"Melhor score F1 para {classifier_name}: {grid_search.best_score_}")
+        best_models[classifier_name] = {
+            'best_estimator': grid_search.best_estimator_,
+            'best_params': grid_search.best_params_,
+            'best_score': grid_search.best_score_
+        }
+
+        print(f"GridSearchCV concluído para {classifier_name}")
+        print(f"Melhores parâmetros para {classifier_name}: {grid_search.best_params_}")
+        print(f"Melhor score F1 para {classifier_name}: {grid_search.best_score_}")
+
+    except Exception as e:
+        print(f"Erro durante GridSearchCV para {classifier_name}: {e}")
 

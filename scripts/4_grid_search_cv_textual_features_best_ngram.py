@@ -78,69 +78,101 @@ yelp_df = pd.read_csv(url_dataset)
 yelp_df['cleaned_content'] = yelp_df['content'].apply(clean_text)
 
 #limpando conteudo textual com tag gramtical e convertendo para string
-yelp_df['cleaned_content_tagged'] = yelp_df['content_tagged'].apply(extract_words_from_tagged_content)
+# yelp_df['cleaned_content_tagged'] = yelp_df['content_tagged'].apply(extract_words_from_tagged_content)
 
-yelp_df_sample = yelp_df.groupby('fake_review').sample(frac=0.50, random_state=42)
+# yelp_df_sample = yelp_df.groupby('fake_review').sample(frac=0.50, random_state=42)
+
+df_falsos = yelp_df[yelp_df['fake_review'] == False]
+df_verdadeiros = yelp_df[yelp_df['fake_review'] == True]
+
+# Contando o número de registros em cada classe
+num_falsos = df_falsos.shape[0]
+num_verdadeiros = df_verdadeiros.shape[0]
+
+# Amostrando aleatoriamente da classe com mais registros
+if num_falsos > num_verdadeiros:
+    df_falsos = df_falsos.sample(num_verdadeiros, random_state=42)
+else:
+    df_verdadeiros = df_verdadeiros.sample(num_falsos, random_state=42)
+
+yelp_df_balanceado = pd.concat([df_falsos, df_verdadeiros])
+yelp_df_sample = yelp_df_balanceado.copy()
+
 # yelp_df_sample = yelp_df.copy()
 
 X = yelp_df_sample['cleaned_content']
 y = yelp_df_sample['fake_review'].values
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-
-test_fold = [-1] * len(X_train) + [0] * len(X_test)  # -1 para treino, 0 para teste
-ps = PredefinedSplit(test_fold)
-
-# Concatenando os conjuntos de treino e teste
-X_combined = np.concatenate([X_train, X_test])
-y_combined = np.concatenate([y_train, y_test])
-
-
 
 classifiers_params = {
-    'Random Forest': {
-        'classifier': RandomForestClassifier(),
-        'params': {
-            'classifier__n_estimators': [200, 400],
-            'classifier__max_depth': [50, None],
-            'classifier__min_samples_split': [5, 10],
-            'classifier__min_samples_leaf': [1]
-        }
-    },
-    'Logistic Regression': {
-        'classifier': LogisticRegression(),
-        'params': {
-            'classifier__max_iter': [100, 1000, 2000],
-            'classifier__C': [0.1, 1, 10],
-            'classifier__solver': ['newton-cg', 'lbfgs']
-        }
-    },
-    'KNN': {
-        'classifier': KNeighborsClassifier(),
-        'params': {
-            'classifier__n_neighbors': [5, 7, 13],
-            'classifier__weights': ['uniform', 'distance'],
-            'classifier__metric': ['euclidean']
-        }
-    },
+    # 'Random Forest': {
+    #     'classifier': RandomForestClassifier(n_jobs=-1),
+    #     'params': {
+    #         'classifier__n_estimators': [None, 500, 1000],
+    #         'classifier__max_depth': [None, 1000],
+    #         'classifier__min_samples_split': [1, 2, 3],
+    #         'classifier__min_samples_leaf': [1, 2]
+    #     }
+    # },
+    # 'Logistic Regression': {
+    #     'classifier': LogisticRegression(n_jobs=-1),
+    #     'params': {
+    #         'classifier__C': [10, 500, 1000, 2000],
+    #         'classifier__penalty': ['l2', 'l1', 'elasticnet'],
+    #         'classifier__solver': ['newton-cg', 'saga', 'elasticnet'],
+    #         'classifier__l1_ratio': [None, 0.5, 0.75]  # Usado apenas se penalty='elasticnet'
+    #     }
+    # },
+    # 'KNN': {
+    #     'classifier': KNeighborsClassifier(n_jobs=-1),
+    #     'params': {
+    #         'classifier__n_neighbors': [3, 5, 13, 17],
+    #         'classifier__weights': ['uniform', 'distance'],
+    #         'classifier__metric': ['euclidean', 'manhattan', 'minkowski'],
+    #         'classifier__p': [1, 2]
+    #     }
+    # },
     'XGBoost': {
-        'classifier': XGBClassifier(),
+        'classifier': XGBClassifier(n_jobs=-1),
         'params': {
-            'classifier__n_estimators': [200, 400],
-            'classifier__learning_rate': [0.1, 0.2, 0.4],
-            'classifier__max_depth': [5, 7, 13]
+            'classifier__learning_rate': [0.01, 0.1],
+            'classifier__n_estimators': [500, 1000],
+            'classifier__max_depth': [None, 9, 15],
+            'classifier__min_child_weight': [1, 5, 10]
+        }
+    },
+    'SVC': {
+        'classifier': SVC(),
+        'params': {
+            'classifier__C': [0.1, 1, 10, 100],
+            'classifier__kernel': ['rbf', 'poly', 'sigmoid'],
+            'classifier__gamma': ['scale', 'auto'],
+            'classifier__max_iter': [10, 100, 1000] 
         }
     }
 }
 
-best_ngrams = {
-    'TF-IDF_Random Forest': (3, 3),
-    'TF-IDF_Logistic Regression': (1, 1),
-    'TF-IDF_KNN': (3, 3),
+# best_ngrams = {
+#     'TF-IDF_Random Forest': (3, 3),
+#     'TF-IDF_Logistic Regression': (1, 1),
+#     'TF-IDF_KNN': (3, 3),
+#     'TF-IDF_XGBoost': (1, 3),
+#     'BoW_Random Forest': (3, 3),
+#     'BoW_Logistic Regression': (1, 2),
+#     'BoW_KNN': (1, 1),
+#     'BoW_XGBoost': (1, 1)
+# }
+
+best_ngrams_full = {
+    # 'TF-IDF_Random Forest': (1, 3),
+    # 'TF-IDF_Logistic Regression': (1, 1),
+    # 'TF-IDF_KNN': (2, 2),
     'TF-IDF_XGBoost': (1, 3),
-    'BoW_Random Forest': (3, 3),
-    'BoW_Logistic Regression': (1, 2),
+    'TF-IDF_SVC': (1, 1),
+    'BoW_Random Forest': (1, 3),
+    'BoW_Logistic Regression': (2, 3),
     'BoW_KNN': (1, 1),
-    'BoW_XGBoost': (1, 1)
+    'BoW_XGBoost': (3, 3),
+    'BoW_SVC': (1, 2)
 }
 
 vectorizers = {
@@ -148,37 +180,14 @@ vectorizers = {
     'BoW': CountVectorizer()
 }
 
-# Repetindo o processo para os outros vetorizadores (TF-IDF e BoW)
-# for vect_name in ['TF-IDF', 'BoW']:
-#     for clf_name in classifiers_params:
-#         ngram_range = best_ngrams[f'{vect_name}_{clf_name}']
 
-#         if vect_name == 'TF-IDF':
-#             vectorizer = TfidfVectorizer(ngram_range=ngram_range)
-#         else:  # BoW
-#             vectorizer = CountVectorizer(ngram_range=ngram_range)
-
-#         X_combined_vect = vectorizer.fit_transform(X_combined)
-
-#         print(f"Iniciando GridSearchCV para {vect_name} com {clf_name}")
-#         pipeline = Pipeline([
-#             ('classifier', classifiers_params[clf_name]['classifier'])
-#         ])
-
-#         grid_search = GridSearchCV(pipeline, classifiers_params[clf_name]['params'], cv=ps, scoring=make_scorer(f1_score), verbose=1)
-#         grid_search.fit(X_combined_vect, y_combined)
-
-#         best_params = grid_search.best_params_
-#         best_score = grid_search.score(X_combined_vect[len(X_train):], y_test)  # Avaliando no conjunto de teste
-
-#         print(f"Vetorizador: {vect_name}, Classificador: {clf_name}, Melhores parâmetros: {best_params}, Melhor F1 score no teste: {best_score}")
-cv = StratifiedKFold(n_splits=5)
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 best_results  = {}
 
 for vect_name in ['TF-IDF', 'BoW']:
     for clf_name in classifiers_params:
         # Selecionando o ngram_range com base no vetorizador e classificador
-        ngram_range = best_ngrams[f'{vect_name}_{clf_name}']
+        ngram_range = best_ngrams_full[f'{vect_name}_{clf_name}']
 
         # Escolhendo o vetorizador apropriado
         if vect_name == 'TF-IDF':
@@ -223,10 +232,11 @@ class Word2VecVectorizer(BaseEstimator, TransformerMixin):
     
 w2v_vect = Word2VecVectorizer(vector_size=100, window=5, min_count=1)
 w2v_vect.fit(X)
-# X_transformed = w2v_vect.transform(X)
-X_train_transformed = w2v_vect.transform(X_train)
-X_test_transformed = w2v_vect.transform(X_test)
-X_combined_transformed = np.vstack((X_train_transformed, X_test_transformed))
+X_transformed = w2v_vect.transform(X)
+
+# X_train_transformed = w2v_vect.transform(X_train)
+# X_test_transformed = w2v_vect.transform(X_test)
+# X_combined_transformed = np.vstack((X_train_transformed, X_test_transformed))
 
 # Atualizando os parâmetros no dicionário classifiers_params
 for clf_name in classifiers_params:

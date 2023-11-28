@@ -164,29 +164,42 @@ classifiers_tfidf = {
     'Random Forest': RandomForestClassifier(n_jobs=-1, **best_params['TF-IDF']['Random Forest']),
     'Logistic Regression': LogisticRegression(**best_params['TF-IDF']['Logistic Regression']),
     'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['TF-IDF']['KNN']),
-    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['TF-IDF']['XGBoost'])
+    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['TF-IDF']['XGBoost']),
+    'SVC': SVC(n_jobs=-1, **best_params['TF-IDF']['SVC'])
 }
 
 classifiers_bow = {
     'Random Forest': RandomForestClassifier(n_jobs=-1, **best_params['BoW']['Random Forest']),
     'Logistic Regression': LogisticRegression(**best_params['BoW']['Logistic Regression']),
     'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['BoW']['KNN']),
-    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['BoW']['XGBoost'])
+    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['BoW']['XGBoost']),
+    'SVC': SVC(n_jobs=-1, **best_params['BoW']['SVC'])
 }
 
 classifiers_word2vec = {
     'Random Forest': RandomForestClassifier(n_jobs=-1, **best_params['Word2Vec']['Random Forest']),
     'Logistic Regression': LogisticRegression(**best_params['Word2Vec']['Logistic Regression']),
     'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['Word2Vec']['KNN']),
-    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['Word2Vec']['XGBoost'])
+    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['Word2Vec']['XGBoost']),
+    'SVC': SVC(n_jobs=-1, **best_params['Word2Vec']['SVC'])
 }
 
 colunas_numericas = {
     'XGBoost': ['qtd_friends', 'qtd_reviews', 'qtd_photos'],
     'KNN': ['qtd_reviews', 'qtd_photos'],
     'Random Forest': ['qtd_friends', 'qtd_reviews', 'qtd_photos'],
-    'Logistic Regression': ['qtd_friends', 'qtd_reviews', 'word_count']
+    'Logistic Regression': ['qtd_friends', 'qtd_reviews', 'word_count'],
+    'SVC': ['qtd_friends', 'qtd_reviews', 'qtd_photos']
 }
+
+colunas_numericas_full = {
+    'XGBoost': ['qtd_friends', 'qtd_reviews', 'qtd_photos'],
+    'KNN': ['qtd_friends', 'qtd_reviews', 'qtd_photos', 'user_has_photo', 'punctuation_count', 'capital_count', 'word_count'],
+    'Random Forest': ['qtd_friends', 'qtd_reviews', 'qtd_photos', 'rating', 'punctuation_count', 'capital_count', 'word_count'],
+    'Logistic Regression': ['qtd_friends', 'qtd_reviews', 'user_has_photo', 'word_count'],
+    'SVC': ['qtd_friends', 'qtd_reviews', 'qtd_photos']
+}
+
 
 best_ngrams = {
     'TF-IDF_Random Forest': (3, 3),
@@ -197,6 +210,19 @@ best_ngrams = {
     'BoW_Logistic Regression': (1, 2),
     'BoW_KNN': (1, 1),
     'BoW_XGBoost': (1, 1)
+}
+
+best_ngrams_full = {
+    'TF-IDF_Random Forest': (2, 2),
+    'TF-IDF_Logistic Regression': (1, 1),
+    'TF-IDF_KNN': (2, 3),
+    'TF-IDF_XGBoost': (1, 3),
+    'TF-IDF_SVC': (3, 3),
+    'BoW_Random Forest': (3, 3),
+    'BoW_Logistic Regression': (1, 3),
+    'BoW_KNN': (1, 1),
+    'BoW_XGBoost': (1, 1),
+    'BoW_SVC': (1, 1)
 }
 
 vectorizers = {

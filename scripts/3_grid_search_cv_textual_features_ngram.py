@@ -67,43 +67,41 @@ yelp_df = pd.read_csv(url_dataset)
 yelp_df['cleaned_content'] = yelp_df['content'].apply(clean_text)
 
 #limpando conteudo textual com tag gramtical e convertendo para string
-yelp_df['cleaned_content_tagged'] = yelp_df['content_tagged'].apply(extract_words_from_tagged_content)
+# yelp_df['cleaned_content_tagged'] = yelp_df['content_tagged'].apply(extract_words_from_tagged_content)
 
-yelp_df_sample = yelp_df.groupby('fake_review').sample(frac=0.3, random_state=42)
+# yelp_df_sample = yelp_df.groupby('fake_review').sample(frac=0.3, random_state=42)
+
+# Separando o DataFrame por classe
+df_falsos = yelp_df[yelp_df['fake_review'] == False]
+df_verdadeiros = yelp_df[yelp_df['fake_review'] == True]
+
+# Contando o número de registros em cada classe
+num_falsos = df_falsos.shape[0]
+num_verdadeiros = df_verdadeiros.shape[0]
+
+# Amostrando aleatoriamente da classe com mais registros
+if num_falsos > num_verdadeiros:
+    df_falsos = df_falsos.sample(num_verdadeiros, random_state=42)
+else:
+    df_verdadeiros = df_verdadeiros.sample(num_falsos, random_state=42)
+
+yelp_df_balanceado = pd.concat([df_falsos, df_verdadeiros])
+yelp_df_sample = yelp_df_balanceado.copy()
+
+
 # yelp_df_sample = yelp_df.copy()
 
 X = yelp_df_sample['cleaned_content']
 y = yelp_df_sample['fake_review'].values
 
-best_params = {
-    'Random Forest': {
-        'max_depth': 100,
-        'min_samples_leaf': 1,
-        'min_samples_split': 5,
-        'n_estimators': 100
-    },
-    'Logistic Regression': {
-        'C': 200,
-        'penalty': 'l2',
-        'solver': 'newton-cg'
-    },
-    'KNN': {
-        'metric': 'manhattan',
-        'n_neighbors': 13,
-        'weights': 'uniform'
-    },
-    'XGBoost': {
-        'learning_rate': 0.005,
-        'max_depth': 7,
-        'n_estimators': 1000
-    }
-}
+
 
 classifiers = {
-    'Random Forest': RandomForestClassifier(),
-    'Logistic Regression': LogisticRegression(),
-    'KNN': KNeighborsClassifier(),
-    'XGBoost': XGBClassifier()
+    'Random Forest': RandomForestClassifier(n_jobs=-1),
+    'Logistic Regression': LogisticRegression(n_jobs=-1),
+    'KNN': KNeighborsClassifier(n_jobs=-1),
+    'XGBoost': XGBClassifier(n_jobs=-1),
+    'SVC': SVC(),
 }
 
 n_grams = [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3)]
@@ -113,7 +111,7 @@ vectorizers = {
     'BoW': CountVectorizer()
 }
 
-cv = StratifiedKFold(n_splits=5)
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 best_results  = {}
 
 for vect_name, vectorizer in vectorizers.items():

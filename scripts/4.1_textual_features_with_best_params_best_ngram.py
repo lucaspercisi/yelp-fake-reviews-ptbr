@@ -89,25 +89,30 @@ y = yelp_df_sample['fake_review'].values
 best_params = {
     'TF-IDF': {
         'Random Forest': {
-            'max_depth': None,
+            'max_depth': 1000,
             'min_samples_leaf': 1,
-            'min_samples_split': 10,
-            'n_estimators': 200
+            'min_samples_split': 3,
+            'n_estimators': 500
         },
         'Logistic Regression': {
             'C': 10,
-            'max_iter': 10,
-            'solver': 'lbfgs'
+            'solver': 'saga',
+            'penalty': 'l2',
+            'l1_ratio': 0.75
         },
         'KNN': {
             'metric': 'euclidean',
-            'n_neighbors': 5,
-            'weights': 'uniform'
+            'n_neighbors': 3,
+            'weights': 'uniform',
+            'p': 1
         },
         'XGBoost': {
             'learning_rate': 0.1,
             'max_depth': 7,
             'n_estimators': 400
+        },
+        'SVC': {
+            
         }
     },
     'BoW': {
@@ -131,6 +136,9 @@ best_params = {
             'learning_rate': 0.1,
             'max_depth': 7,
             'n_estimators': 400
+        },
+        'SVC': {
+            
         }
     },
     'Word2Vec': {
@@ -154,6 +162,9 @@ best_params = {
             'learning_rate': 0.1,
             'max_depth': 7,
             'n_estimators': 400
+        },
+        'SVC': {
+            
         }
     }
 }
@@ -162,32 +173,37 @@ classifiers_tfidf = {
     'Random Forest': RandomForestClassifier(n_jobs=-1, **best_params['TF-IDF']['Random Forest']),
     'Logistic Regression': LogisticRegression(**best_params['TF-IDF']['Logistic Regression']),
     'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['TF-IDF']['KNN']),
-    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['TF-IDF']['XGBoost'])
+    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['TF-IDF']['XGBoost']),
+    'SVC': SVC(**best_params['TF-IDF']['SVC'])
 }
 
 classifiers_bow = {
     'Random Forest': RandomForestClassifier(n_jobs=-1, **best_params['BoW']['Random Forest']),
     'Logistic Regression': LogisticRegression(**best_params['BoW']['Logistic Regression']),
     'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['BoW']['KNN']),
-    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['BoW']['XGBoost'])
+    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['BoW']['XGBoost']),
+    'SVC': SVC(**best_params['BoW']['SVC'])
 }
 
 classifiers_word2vec = {
     'Random Forest': RandomForestClassifier(n_jobs=-1, **best_params['Word2Vec']['Random Forest']),
     'Logistic Regression': LogisticRegression(**best_params['Word2Vec']['Logistic Regression']),
     'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['Word2Vec']['KNN']),
-    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['Word2Vec']['XGBoost'])
+    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['Word2Vec']['XGBoost']),
+    'SVC': SVC(**best_params['Word2Vec']['SVC'])
 }
 
 best_ngrams = {
-    'TF-IDF_Random Forest': (3, 3),
+    'TF-IDF_Random Forest': (1, 3),
     'TF-IDF_Logistic Regression': (1, 1),
-    'TF-IDF_KNN': (3, 3),
+    'TF-IDF_KNN': (2, 2),
     'TF-IDF_XGBoost': (1, 3),
-    'BoW_Random Forest': (3, 3),
-    'BoW_Logistic Regression': (1, 2),
+    'TF-IDF_SVC': (1, 1),
+    'BoW_Random Forest': (1, 3),
+    'BoW_Logistic Regression': (2, 3),
     'BoW_KNN': (1, 1),
-    'BoW_XGBoost': (1, 1)
+    'BoW_XGBoost': (3, 3),
+    'BoW_SVC': (1, 2)
 }
 
 vectorizers = {

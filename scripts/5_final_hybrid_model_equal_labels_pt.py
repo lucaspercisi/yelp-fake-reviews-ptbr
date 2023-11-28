@@ -74,6 +74,7 @@ def extract_words_from_tagged_content(tagged_content):
 url_dataset = 'https://raw.githubusercontent.com/lucaspercisi/yelp-fake-reviews-ptbr/main/Datasets/portuguese/yelp-fake-reviews-dataset-pt-pos-tagged.csv'
 yelp_df = pd.read_csv(url_dataset)
 
+
 # #Contando pontuação
 # yelp_df['punctuation_count'] = yelp_df['content'].apply(lambda x: len([c for c in str(x) if c in set(punctuation)]))
 
@@ -87,11 +88,27 @@ yelp_df['word_count'] = yelp_df['content'].apply(lambda x: len(str(x).split(" ")
 yelp_df['cleaned_content'] = yelp_df['content'].apply(clean_text)
 
 #limpando conteudo textual com tag gramtical e convertendo para string
-yelp_df['cleaned_content_tagged'] = yelp_df['content_tagged'].apply(extract_words_from_tagged_content)
-
+# yelp_df['cleaned_content_tagged'] = yelp_df['content_tagged'].apply(extract_words_from_tagged_content)
 # yelp_df_sample = yelp_df.groupby('fake_review').sample(frac=0.1, random_state=42)
-yelp_df_sample = yelp_df.copy()
-X = yelp_df_sample['cleaned_content_tagged']
+
+
+# Separando o DataFrame por classe
+df_falsos = yelp_df[yelp_df['fake_review'] == False]
+df_verdadeiros = yelp_df[yelp_df['fake_review'] == True]
+
+# Contando o número de registros em cada classe
+num_falsos = df_falsos.shape[0]
+num_verdadeiros = df_verdadeiros.shape[0]
+
+# Amostrando aleatoriamente da classe com mais registros
+if num_falsos > num_verdadeiros:
+    df_falsos = df_falsos.sample(num_verdadeiros, random_state=42)  # Usando um estado aleatório para reprodutibilidade
+else:
+    df_verdadeiros = df_verdadeiros.sample(num_falsos, random_state=42)
+
+yelp_df_balanceado = pd.concat([df_falsos, df_verdadeiros])
+yelp_df_sample = yelp_df_balanceado.copy()
+X = yelp_df_sample['cleaned_content']
 y = yelp_df_sample['fake_review'].values
 
 

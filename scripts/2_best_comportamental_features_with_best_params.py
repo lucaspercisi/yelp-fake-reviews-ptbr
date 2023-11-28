@@ -70,43 +70,73 @@ yelp_df['word_count'] = yelp_df['content'].apply(lambda x: len(str(x).split(" ")
 # yelp_df['cleaned_content_tagged'] = yelp_df['content_tagged'].apply(extract_words_from_tagged_content)
 
 # yelp_df_sample = yelp_df.groupby('fake_review').sample(frac=0.1, random_state=42)
-yelp_df_sample = yelp_df.copy()
+
+# Separando o DataFrame por classe
+df_falsos = yelp_df[yelp_df['fake_review'] == False]
+df_verdadeiros = yelp_df[yelp_df['fake_review'] == True]
+
+# Contando o número de registros em cada classe
+num_falsos = df_falsos.shape[0]
+num_verdadeiros = df_verdadeiros.shape[0]
+
+# Amostrando aleatoriamente da classe com mais registros
+if num_falsos > num_verdadeiros:
+    df_falsos = df_falsos.sample(num_verdadeiros, random_state=42)
+else:
+    df_verdadeiros = df_verdadeiros.sample(num_falsos, random_state=42)
+
+yelp_df_balanceado = pd.concat([df_falsos, df_verdadeiros])
+yelp_df_sample = yelp_df_balanceado.copy()
+
+# yelp_df_sample = yelp_df.copy()
 
 X = yelp_df_sample[['qtd_friends', 'qtd_reviews', 'qtd_photos',	'rating', 'user_has_photo', 'punctuation_count', 'capital_count', 'word_count']]
 y = yelp_df_sample['fake_review'].values  
 
+    
+
+
 best_params = {
     'Random Forest': {
-        'max_depth': 100,
-        'min_samples_leaf': 1,
-        'min_samples_split': 5,
-        'n_estimators': 100
+        'n_estimators': 1000,
+        'max_depth': None,
+        'min_samples_split': 3,
+        'min_samples_leaf': 2
     },
     'Logistic Regression': {
-        'C': 200,
+        'C': 500,
         'penalty': 'l2',
-        'solver': 'newton-cg'
+        'solver': 'newton-cg',
+        'l1_ratio': None
     },
     'KNN': {
+        'n_neighbors': 17,
+        'weights': 'uniform',
         'metric': 'manhattan',
-        'n_neighbors': 13,
-        'weights': 'uniform'
+        'p': 1  # Parâmetro de potência para a métrica Minkowski
     },
     'XGBoost': {
-        'learning_rate': 0.005,
-        'max_depth': 7,
-        'n_estimators': 1000
+        'learning_rate': 0.01,
+        'n_estimators': 1000,
+        'max_depth': 7
+    },
+    'SVC': {
+        'C': 10,
+        'kernel': 'rbf',
+        'gamma': 'scale',
+        'max_iter': 10000
     }
 }
 
 classifiers = {
-    'Random Forest': RandomForestClassifier(**best_params['Random Forest']),
-    'Logistic Regression': LogisticRegression(**best_params['Logistic Regression']),
-    'KNN': KNeighborsClassifier(**best_params['KNN']),
-    'XGBoost': XGBClassifier(**best_params['XGBoost'])
+    'Random Forest': RandomForestClassifier(n_jobs=-1, **best_params['Random Forest']),
+    'Logistic Regression': LogisticRegression(n_jobs=-1, **best_params['Logistic Regression']),
+    'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['KNN']),
+    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['XGBoost']),
+    'SVC': SVC(**best_params['SVC'])
 }
 
-cv = StratifiedKFold(n_splits=5)
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
 best_features_set = {}
 
