@@ -121,7 +121,7 @@ best_params = {
         'max_depth': 11
     },
     'SVC': {
-        'C': 0.1
+        'C': 0.1,
         'kernel': 'sigmoid',
         'gamma': 'scale', 
         'max_iter': 1000
