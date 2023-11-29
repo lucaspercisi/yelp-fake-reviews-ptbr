@@ -108,84 +108,96 @@ y = yelp_df_sample['fake_review'].values
 best_params = {
     'TF-IDF': {
         'Random Forest': {
-            'max_depth': None,
+            'max_depth': 1000,
             'min_samples_leaf': 1,
-            'min_samples_split': 10,
-            'n_estimators': 200
+            'min_samples_split': 3,
+            'n_estimators': 500
         },
         'Logistic Regression': {
             'C': 10,
-            'max_iter': 300,
-            'solver': 'lbfgs'
+            'solver': 'saga',
+            'penalty': 'l2',
+            'max_iter': 5000
         },
         'KNN': {
             'metric': 'euclidean',
-            'n_neighbors': 5,
-            'weights': 'uniform'
-        },
-        'XGBoost': {
-            'learning_rate': 0.01,
-            'max_depth': 15,
-            'n_estimators': 1000,
-            'min_child_weight': 10
+            'n_neighbors': 3,
+            'weights': 'uniform',
+            'p': 1
         },
         'SVC': {
             'C': 0.1,
             'gamma': 'scale',
             'kernel': 'rbf',
             'max_iter': 1000
+        },
+        'XGBoost': {
+            'learning_rate': 0.01,
+            'max_depth': 15,
+            'n_estimators': 1000,
+            'min_child_weight': 10
         }
     },
     'BoW': {
         'Random Forest': {
-            'max_depth': None,
+            'max_depth': 1000,
             'min_samples_leaf': 1,
-            'min_samples_split': 10,
-            'n_estimators': 200
+            'min_samples_split': 2,
+            'n_estimators': 1000
         },
         'Logistic Regression': {
-            'C': 10,
-            'max_iter': 100,
-            'solver': 'newton-cg'
+            'C': 2000,
+            'penalty': 'l2',
+            'solver': 'newton-cg',
+            'max_iter': 5000
         },
         'KNN': {
             'metric': 'euclidean',
-            'n_neighbors': 5,
+            'n_neighbors': 3,
             'weights': 'uniform'
         },
-        'XGBoost': {
-            'learning_rate': 0.2,
-            'max_depth': 7,
-            'n_estimators': 400
-        },
         'SVC': {
-            
+            'C': 500,
+            'gamma': 'auto',
+            'kernel': 'rbf',
+            'max_iter': 5000
+        },
+        'XGBoost': {
+            'learning_rate': 0.01,
+            'max_depth': None,
+            'min_child_weight': 1,
+            'n_estimators': 500
         }
     },
     'Word2Vec': {
         'Random Forest': {
             'max_depth': None,
             'min_samples_leaf': 1,
-            'min_samples_split': 10,
-            'n_estimators': 400
+            'min_samples_split': 3,
+            'n_estimators': 1000
         },
         'Logistic Regression': {
-            'C': 10,
-            'max_iter': 100,
-            'solver': 'newton-cg'
+            'C': 3000,
+            'solver': 'newton-cg',
+            'penalty': 'l2',
+            'max_iter': 5000
         },
         'KNN': {
             'metric': 'euclidean',
-            'n_neighbors': 5,
-            'weights': 'uniform'
-        },
-        'XGBoost': {
-            'learning_rate': 0.2,
-            'max_depth': 5,
-            'n_estimators': 200
+            'n_neighbors': 25,
+            'weights': 'distance'
         },
         'SVC': {
-            
+            'C': 100,
+            'gamma': 'scale',
+            'kernel': 'rbf',
+            'max_iter': 5000
+        },
+        'XGBoost': {
+            'learning_rate': 0.01,
+            'max_depth': 9,
+            'min_child_weight': 10,
+            'n_estimators': 500
         }
     }
 }
@@ -195,7 +207,7 @@ classifiers_tfidf = {
     'Logistic Regression': LogisticRegression(**best_params['TF-IDF']['Logistic Regression']),
     'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['TF-IDF']['KNN']),
     'XGBoost': XGBClassifier(n_jobs=-1, **best_params['TF-IDF']['XGBoost']),
-    'SVC': SVC(n_jobs=-1, **best_params['TF-IDF']['SVC'])
+    'SVC': SVC(**best_params['TF-IDF']['SVC'])
 }
 
 classifiers_bow = {
@@ -203,7 +215,7 @@ classifiers_bow = {
     'Logistic Regression': LogisticRegression(**best_params['BoW']['Logistic Regression']),
     'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['BoW']['KNN']),
     'XGBoost': XGBClassifier(n_jobs=-1, **best_params['BoW']['XGBoost']),
-    'SVC': SVC(n_jobs=-1, **best_params['BoW']['SVC'])
+    'SVC': SVC(**best_params['BoW']['SVC'])
 }
 
 classifiers_word2vec = {
@@ -211,7 +223,7 @@ classifiers_word2vec = {
     'Logistic Regression': LogisticRegression(**best_params['Word2Vec']['Logistic Regression']),
     'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['Word2Vec']['KNN']),
     'XGBoost': XGBClassifier(n_jobs=-1, **best_params['Word2Vec']['XGBoost']),
-    'SVC': SVC(n_jobs=-1, **best_params['Word2Vec']['SVC'])
+    'SVC': SVC(**best_params['Word2Vec']['SVC'])
 }
 
 # colunas_numericas = {
@@ -223,11 +235,11 @@ classifiers_word2vec = {
 # }
 
 colunas_numericas_full = {
-    'XGBoost': ['qtd_friends', 'qtd_reviews', 'qtd_photos'],
-    'KNN': ['qtd_friends', 'qtd_reviews', 'qtd_photos', 'punctuation_count', 'capital_count', 'word_count'],
     'Random Forest': ['qtd_friends', 'qtd_reviews', 'qtd_photos'],
     'Logistic Regression': ['qtd_friends', 'qtd_reviews', 'user_has_photo', 'word_count'],
-    'SVC': ['qtd_friends', 'qtd_reviews', 'qtd_photos', 'rating', 'punctuation_count', 'capital_count', 'word_count']
+    'KNN': ['qtd_friends', 'qtd_reviews', 'qtd_photos', 'punctuation_count', 'capital_count', 'word_count'],
+    'SVC': ['qtd_friends', 'qtd_reviews', 'qtd_photos', 'rating', 'punctuation_count', 'capital_count', 'word_count'],
+    'XGBoost': ['qtd_friends', 'qtd_reviews', 'qtd_photos']
 }
 
 
@@ -243,16 +255,16 @@ colunas_numericas_full = {
 # }
 
 best_ngrams_full = {
-    'TF-IDF_Random Forest': (2, 2),
+    'TF-IDF_Random Forest': (1, 3),
     'TF-IDF_Logistic Regression': (1, 1),
-    'TF-IDF_KNN': (2, 3),
+    'TF-IDF_KNN': (2, 2),
     'TF-IDF_XGBoost': (1, 3),
-    'TF-IDF_SVC': (3, 3),
-    'BoW_Random Forest': (3, 3),
-    'BoW_Logistic Regression': (1, 3),
+    'TF-IDF_SVC': (1, 1),
+    'BoW_Random Forest': (1, 3),
+    'BoW_Logistic Regression': (2, 3),
     'BoW_KNN': (1, 1),
-    'BoW_XGBoost': (1, 1),
-    'BoW_SVC': (1, 1)
+    'BoW_XGBoost': (3, 3),
+    'BoW_SVC': (1, 2)
 }
 
 vectorizers = {
@@ -261,19 +273,13 @@ vectorizers = {
 }
 
 results_df_global = pd.DataFrame(columns=[
-    'classifier', 'vectorizer', 'features_used', 'accuracy_mean', 
+    'scenario', 'classifier', 'vectorizer', 'features_used', 'accuracy_mean', 
     'accuracy_variance', 'accuracy_min', 'accuracy_max', 
     'precision_mean', 'precision_variance', 'precision_min', 'precision_max', 
     'recall_mean', 'recall_variance', 'recall_min', 'recall_max', 
     'f1_score_mean', 'f1_score_variance', 'f1_score_min', 'f1_score_max'
 ])
 
-# scorers = {
-#     'accuracy': make_scorer(accuracy_score),
-#     'precision': make_scorer(precision_score),
-#     'recall': make_scorer(recall_score),
-#     'f1_score': make_scorer(f1_score)
-# }
 
 # Caminho base para salvar os arquivos CSV
 caminho_base = 'C:/Users/lucas/Documents/Projetos/yelp-fake-reviews-ptbr/Results/spyder'
@@ -291,12 +297,12 @@ def run_and_save_results(clf, X, y, classifier_name, vectorizer, results_df, fea
         'roc_auc': 'roc_auc'
     }
     
-    # cv_results = cross_val_score(clf, X, y, cv=5, scoring='scorers', return_train_score=False)
-    cv_results = cross_validate(clf, X, y, cv=cv, scoring=scorers, return_train_score=False, verbose=2)
+    cv_results = cross_validate(clf, X, y, cv=cv, scoring=scorers, return_train_score=False, verbose=3)
 
     # Preparando os resultados
     features_used = ', '.join(features_useds.columns)
     results = {
+        'scenario' : 'pt_equal',
         'classifier': classifier_name,
         'vectorizer': vectorizer,
         'features_used': features_used,
@@ -326,43 +332,11 @@ def run_and_save_results(clf, X, y, classifier_name, vectorizer, results_df, fea
     updated_results_df = pd.concat([results_df, pd.DataFrame([results])], axis=0, ignore_index=True)
 
     agora = datetime.now().strftime("%Y%m%d_%H%M%S")
-    nome_arquivo = f"{caminho_base}/resultados_pt_balanced_{agora}.csv"
+    nome_arquivo = f"{caminho_base}/resultados_pt_equal_{agora}.csv"
     
     updated_results_df.to_csv(nome_arquivo, index=False)
     
     return updated_results_df
-
-# Função para adicionar resultados ao CSV com nome de arquivo dinâmico
-# def adicionar_ao_csv(dados, caminho_base, vetorizador, classificador):
-#     # Obtendo a data e hora atuais
-#     agora = datetime.now().strftime("%Y%m%d_%H%M%S")
-#     nome_arquivo = f"{caminho_base}/resultados_{vetorizador}_{classificador}_{agora}.csv"
-    
-#     df_temp = pd.DataFrame([dados])
-#     df_temp.to_csv(nome_arquivo, index=False)
-
-
-# # Para vetorizadores TF-IDF e BoW
-# for vect_name, classifier_dict in {'TF-IDF': classifiers_tfidf, 'BoW': classifiers_bow}.items():
-#     for clf_name, classifier in classifier_dict.items():
-#         ngram_range = best_ngrams[f'{vect_name}_{clf_name}']
-#         print(f"Terinando -> {vect_name}, {clf_name}")
-        
-#         vectorizer = TfidfVectorizer(ngram_range=ngram_range) if vect_name == 'TF-IDF' else CountVectorizer(ngram_range=ngram_range)
-
-#         # Escolhendo as features numéricas apropriadas
-#         colunas_a_incluir = colunas_numericas.get(clf_name, [])
-#         X_numeric = yelp_df_sample[colunas_a_incluir].values if colunas_a_incluir else None
-
-#         # Transformando o texto e concatenando com as features numéricas
-#         X_text = vectorizer.fit_transform(X)
-#         X_combined = hstack((X_text, X_numeric)) if X_numeric is not None else X_text
-
-#         # Calculando o F1 score médio
-#         scores = cross_val_score(classifier, X_combined, y, cv=5, scoring='f1')
-#         print(f"{vect_name}, {clf_name}: Média F1 Score = {np.mean(scores)}")
-
-
 
 for vect_name, classifier_dict in {'TF-IDF': classifiers_tfidf, 'BoW': classifiers_bow}.items():
     for clf_name, classifier in classifier_dict.items():
@@ -375,10 +349,20 @@ for vect_name, classifier_dict in {'TF-IDF': classifiers_tfidf, 'BoW': classifie
         # Escolhendo as features numéricas apropriadas
         colunas_a_incluir = colunas_numericas_full.get(clf_name, [])
         X_numeric = yelp_df_sample[colunas_a_incluir].values if colunas_a_incluir else None
+        
+        # Converte as colunas de X_numeric para float, garantindo que são todas numéricas
+        if X_numeric is not None:
+            X_numeric = X_numeric.astype(float)
+        
+        X_text = vectorizer.fit_transform(X)
+        
+        # Agora, combina X_text (matriz esparsa) com X_numeric (numpy array)
+        X_combined = hstack((X_text, X_numeric)) if X_numeric is not None else X_text
+
 
         # Transformando o texto e concatenando com as features numéricas
-        X_text = vectorizer.fit_transform(X)
-        X_combined = hstack((X_text, X_numeric)) if X_numeric is not None else X_text
+
+        # X_combined = hstack((X_text, X_numeric)) if X_numeric is not None else X_text
 
         # Executando o classificador e salvando os resultados
         features_used = pd.DataFrame(X_numeric, columns=colunas_a_incluir)
@@ -410,19 +394,6 @@ class Word2VecVectorizer(BaseEstimator, TransformerMixin):
             for words in [sentence.split() for sentence in X]
         ])
     
-# w2v_vect = Word2VecVectorizer(vector_size=100, window=5, min_count=1)
-# w2v_vect.fit(X)
-# X_transformed = w2v_vect.transform(X)
-
-# # Para Word2Vec, combinando com features numéricas
-# for clf_name, classifier in classifiers_word2vec.items():
-#     colunas_a_incluir = colunas_numericas.get(clf_name, [])
-#     X_numeric = yelp_df_sample[colunas_a_incluir].values if colunas_a_incluir else None
-#     X_combined = np.hstack((X_transformed, X_numeric)) if X_numeric is not None else X_transformed
-
-#     scores = cross_val_score(classifier, X_combined, y, cv=5, scoring='f1')
-#     print(f"Word2Vec, {clf_name}: Média F1 Score = {np.mean(scores)}")
-#     adicionar_ao_csv({'Vetorizador': 'Word2Vec', 'Classificador': clf_name, 'F1 Score': np.mean(scores)}, caminho_base, 'Word2Vec', clf_name)
 
 w2v_vect = Word2VecVectorizer(vector_size=100, window=5, min_count=1)
 w2v_vect.fit(X)

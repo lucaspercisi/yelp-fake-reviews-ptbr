@@ -104,33 +104,31 @@ X = yelp_df_sample['cleaned_content']
 y = yelp_df_sample['fake_review'].values
 
 classifiers_params = {
-    'Random Forest': {
-        'classifier': RandomForestClassifier(n_jobs=-1),
-        'params': {
-            'classifier__n_estimators': [None, 500, 1000],
-            'classifier__max_depth': [None, 1000],
-            'classifier__min_samples_split': [1, 2, 3],
-            'classifier__min_samples_leaf': [1, 2]
-        }
-    },
-    'Logistic Regression': {
-        'classifier': LogisticRegression(n_jobs=-1),
-        'params': {
-            'classifier__C': [10, 500, 1000, 2000],
-            'classifier__penalty': ['l2', 'l1', 'elasticnet'],
-            'classifier__solver': ['newton-cg', 'saga', 'elasticnet'],
-            'classifier__l1_ratio': [None, 0.5, 0.75]  # Usado apenas se penalty='elasticnet'
-        }
-    },
-    'KNN': {
-        'classifier': KNeighborsClassifier(n_jobs=-1),
-        'params': {
-            'classifier__n_neighbors': [3, 5, 13, 17],
-            'classifier__weights': ['uniform', 'distance'],
-            'classifier__metric': ['euclidean', 'manhattan', 'minkowski'],
-            'classifier__p': [1, 2]
-        }
-    },
+    # 'Random Forest': { OK
+    #     'classifier': RandomForestClassifier(n_jobs=-1),
+    #     'params': {
+    #         'classifier__n_estimators': [None, 500, 1000],
+    #         'classifier__max_depth': [None, 1000],
+    #         'classifier__min_samples_split': [1, 3],
+    #         'classifier__min_samples_leaf': [1, 3]
+    #     }
+    # },
+    # 'Logistic Regression': {
+    #     'classifier': LogisticRegression(n_jobs=-1),
+    #     'params': {
+    #         'classifier__C': [10, 500, 1000, 2000],
+    #         'classifier__penalty': ['l2', 'l1'],
+    #         'classifier__solver': ['newton-cg', 'saga']
+    #     }
+    # },
+    # 'KNN': {
+    #     'classifier': KNeighborsClassifier(n_jobs=-1),
+    #     'params': {
+    #         'classifier__n_neighbors': [3, 5, 13, 17],
+    #         'classifier__weights': ['uniform', 'distance'],
+    #         'classifier__metric': ['euclidean', 'manhattan']
+    #     }
+    # },
     'XGBoost': {
         'classifier': XGBClassifier(n_jobs=-1),
         'params': {
@@ -139,16 +137,16 @@ classifiers_params = {
             'classifier__max_depth': [None, 9, 15],
             'classifier__min_child_weight': [1, 5, 10]
         }
-    },
-    'SVC': {
-        'classifier': SVC(),
-        'params': {
-            'classifier__C': [0.1, 1, 10, 100],
-            'classifier__kernel': ['rbf', 'poly', 'sigmoid'],
-            'classifier__gamma': ['scale', 'auto'],
-            'classifier__max_iter': [10, 100, 1000] 
-        }
     }
+    # 'SVC': {
+    #     'classifier': SVC(),
+    #     'params': {
+    #         'classifier__C': [100, 500],
+    #         'classifier__kernel': ['rbf'],
+    #         'classifier__gamma': ['scale', 'auto'],
+    #         'classifier__max_iter': [5000, 10000] 
+    #     }
+    # }
 }
 
 # best_ngrams = {
@@ -181,7 +179,7 @@ vectorizers = {
 }
 
 
-cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+cv = StratifiedKFold(n_splits=4, shuffle=True, random_state=42)
 best_results  = {}
 
 # for vect_name in ['TF-IDF', 'BoW']:
