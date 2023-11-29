@@ -235,10 +235,6 @@ w2v_vect = Word2VecVectorizer(vector_size=100, window=5, min_count=1)
 w2v_vect.fit(X)
 X_transformed = w2v_vect.transform(X)
 
-# X_train_transformed = w2v_vect.transform(X_train)
-# X_test_transformed = w2v_vect.transform(X_test)
-# X_combined_transformed = np.vstack((X_train_transformed, X_test_transformed))
-
 # Atualizando os parâmetros no dicionário classifiers_params
 for clf_name in classifiers_params:
     params = classifiers_params[clf_name]['params']
@@ -263,20 +259,3 @@ for clf_name, data in classifiers_params.items():
     # Exibindo os melhores parâmetros e o melhor score F1
     print(f"Classificador: {clf_name}, Melhores parâmetros: {grid_search.best_params_}, Melhor F1 score: {grid_search.best_score_} com Word2Vec")
 
-# Loop para executar o GridSearchCV para cada classificador
-# for clf_name, data in classifiers_params.items():
-#     print(f"Iniciando GridSearchCV para {clf_name} com Word2Vec")
-
-#     classifier = data['classifier']
-#     grid_search = GridSearchCV(classifier, data['params'], cv=ps, scoring=make_scorer(f1_score), verbose=1)
-
-#     # Ajuste do GridSearchCV ao conjunto de dados transformados pelo Word2Vec
-#     grid_search.fit(X_combined_transformed, y_combined)
-
-#     # Melhores parâmetros e score F1 no conjunto de teste
-#     best_params = grid_search.best_params_
-#     best_score = grid_search.score(X_test_transformed, y_test)
-
-#     print(f"Classificador: {clf_name}, Melhores parâmetros: {best_params}, Melhor F1 score no teste: {best_score}")
-    
-    
