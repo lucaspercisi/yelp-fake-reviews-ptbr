@@ -68,10 +68,10 @@ url_dataset = 'https://raw.githubusercontent.com/lucaspercisi/yelp-fake-reviews-
 yelp_df = pd.read_csv(url_dataset)
 
 # #Contando pontuação
-# yelp_df['punctuation_count'] = yelp_df['content'].apply(lambda x: len([c for c in str(x) if c in set(punctuation)]))
+yelp_df['punctuation_count'] = yelp_df['content'].apply(lambda x: len([c for c in str(x) if c in set(punctuation)]))
 
 # #Contanto letras em caixa alta
-# yelp_df['capital_count'] = yelp_df['content'].apply(lambda x: len([c for c in str(x) if c.isupper()]))
+yelp_df['capital_count'] = yelp_df['content'].apply(lambda x: len([c for c in str(x) if c.isupper()]))
 
 # #Contando quantidade de palvras
 yelp_df['word_count'] = yelp_df['content'].apply(lambda x: len(str(x).split(" ")))
@@ -80,11 +80,28 @@ yelp_df['word_count'] = yelp_df['content'].apply(lambda x: len(str(x).split(" ")
 yelp_df['cleaned_content'] = yelp_df['content'].apply(clean_text)
 
 #limpando conteudo textual com tag gramtical e convertendo para string
-yelp_df['cleaned_content_tagged'] = yelp_df['content_tagged'].apply(extract_words_from_tagged_content)
+# yelp_df['cleaned_content_tagged'] = yelp_df['content_tagged'].apply(extract_words_from_tagged_content)
 
 # yelp_df_sample = yelp_df.groupby('fake_review').sample(frac=0.1, random_state=42)
-yelp_df_sample = yelp_df.copy()
-X = yelp_df_sample['cleaned_content_tagged']
+
+df_falsos = yelp_df[yelp_df['fake_review'] == False]
+df_verdadeiros = yelp_df[yelp_df['fake_review'] == True]
+
+# Contando o número de registros em cada classe
+num_falsos = df_falsos.shape[0]
+num_verdadeiros = df_verdadeiros.shape[0]
+
+# Amostrando aleatoriamente da classe com mais registros
+if num_falsos > num_verdadeiros:
+    df_falsos = df_falsos.sample(num_verdadeiros, random_state=42)
+else:
+    df_verdadeiros = df_verdadeiros.sample(num_falsos, random_state=42)
+
+yelp_df_balanceado = pd.concat([df_falsos, df_verdadeiros])
+yelp_df_sample = yelp_df_balanceado.copy()
+
+
+X = yelp_df_sample['cleaned_content']
 y = yelp_df_sample['fake_review'].values
 
 
@@ -107,9 +124,16 @@ best_params = {
             'weights': 'uniform'
         },
         'XGBoost': {
-            'learning_rate': 0.2,
-            'max_depth': 5,
-            'n_estimators': 200
+            'learning_rate': 0.01,
+            'max_depth': 15,
+            'n_estimators': 1000,
+            'min_child_weight': 10
+        },
+        'SVC': {
+            'C': 0.1,
+            'gamma': 'scale',
+            'kernel': 'rbf',
+            'max_iter': 1000
         }
     },
     'BoW': {
@@ -133,6 +157,9 @@ best_params = {
             'learning_rate': 0.2,
             'max_depth': 7,
             'n_estimators': 400
+        },
+        'SVC': {
+            
         }
     },
     'Word2Vec': {
@@ -156,6 +183,9 @@ best_params = {
             'learning_rate': 0.2,
             'max_depth': 5,
             'n_estimators': 200
+        },
+        'SVC': {
+            
         }
     }
 }
@@ -184,33 +214,33 @@ classifiers_word2vec = {
     'SVC': SVC(n_jobs=-1, **best_params['Word2Vec']['SVC'])
 }
 
-colunas_numericas = {
-    'XGBoost': ['qtd_friends', 'qtd_reviews', 'qtd_photos'],
-    'KNN': ['qtd_reviews', 'qtd_photos'],
-    'Random Forest': ['qtd_friends', 'qtd_reviews', 'qtd_photos'],
-    'Logistic Regression': ['qtd_friends', 'qtd_reviews', 'word_count'],
-    'SVC': ['qtd_friends', 'qtd_reviews', 'qtd_photos']
-}
+# colunas_numericas = {
+#     'XGBoost': ['qtd_friends', 'qtd_reviews', 'qtd_photos'],
+#     'KNN': ['qtd_reviews', 'qtd_photos'],
+#     'Random Forest': ['qtd_friends', 'qtd_reviews', 'qtd_photos'],
+#     'Logistic Regression': ['qtd_friends', 'qtd_reviews', 'word_count'],
+#     'SVC': ['qtd_friends', 'qtd_reviews', 'qtd_photos']
+# }
 
 colunas_numericas_full = {
     'XGBoost': ['qtd_friends', 'qtd_reviews', 'qtd_photos'],
-    'KNN': ['qtd_friends', 'qtd_reviews', 'qtd_photos', 'user_has_photo', 'punctuation_count', 'capital_count', 'word_count'],
-    'Random Forest': ['qtd_friends', 'qtd_reviews', 'qtd_photos', 'rating', 'punctuation_count', 'capital_count', 'word_count'],
+    'KNN': ['qtd_friends', 'qtd_reviews', 'qtd_photos', 'punctuation_count', 'capital_count', 'word_count'],
+    'Random Forest': ['qtd_friends', 'qtd_reviews', 'qtd_photos'],
     'Logistic Regression': ['qtd_friends', 'qtd_reviews', 'user_has_photo', 'word_count'],
-    'SVC': ['qtd_friends', 'qtd_reviews', 'qtd_photos']
+    'SVC': ['qtd_friends', 'qtd_reviews', 'qtd_photos', 'rating', 'punctuation_count', 'capital_count', 'word_count']
 }
 
 
-best_ngrams = {
-    'TF-IDF_Random Forest': (3, 3),
-    'TF-IDF_Logistic Regression': (1, 1),
-    'TF-IDF_KNN': (3, 3),
-    'TF-IDF_XGBoost': (1, 3),
-    'BoW_Random Forest': (3, 3),
-    'BoW_Logistic Regression': (1, 2),
-    'BoW_KNN': (1, 1),
-    'BoW_XGBoost': (1, 1)
-}
+# best_ngrams = {
+#     'TF-IDF_Random Forest': (3, 3),
+#     'TF-IDF_Logistic Regression': (1, 1),
+#     'TF-IDF_KNN': (3, 3),
+#     'TF-IDF_XGBoost': (1, 3),
+#     'BoW_Random Forest': (3, 3),
+#     'BoW_Logistic Regression': (1, 2),
+#     'BoW_KNN': (1, 1),
+#     'BoW_XGBoost': (1, 1)
+# }
 
 best_ngrams_full = {
     'TF-IDF_Random Forest': (2, 2),
@@ -251,6 +281,8 @@ caminho_base = 'C:/Users/lucas/Documents/Projetos/yelp-fake-reviews-ptbr/Results
 # Função para executar o classificador com um número reduzido de features e salvar os resultados
 def run_and_save_results(clf, X, y, classifier_name, vectorizer, results_df, features_useds):
     
+    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    
     scorers = {
         'accuracy': 'accuracy',
         'precision': 'precision',
@@ -260,7 +292,7 @@ def run_and_save_results(clf, X, y, classifier_name, vectorizer, results_df, fea
     }
     
     # cv_results = cross_val_score(clf, X, y, cv=5, scoring='scorers', return_train_score=False)
-    cv_results = cross_validate(clf, X, y, cv=5, scoring=scorers, return_train_score=False)
+    cv_results = cross_validate(clf, X, y, cv=cv, scoring=scorers, return_train_score=False, verbose=2)
 
     # Preparando os resultados
     features_used = ', '.join(features_useds.columns)
@@ -294,20 +326,20 @@ def run_and_save_results(clf, X, y, classifier_name, vectorizer, results_df, fea
     updated_results_df = pd.concat([results_df, pd.DataFrame([results])], axis=0, ignore_index=True)
 
     agora = datetime.now().strftime("%Y%m%d_%H%M%S")
-    nome_arquivo = f"{caminho_base}/resultados_{vectorizer}_{classifier_name}_{agora}.csv"
+    nome_arquivo = f"{caminho_base}/resultados_pt_balanced_{agora}.csv"
     
     updated_results_df.to_csv(nome_arquivo, index=False)
     
     return updated_results_df
 
 # Função para adicionar resultados ao CSV com nome de arquivo dinâmico
-def adicionar_ao_csv(dados, caminho_base, vetorizador, classificador):
-    # Obtendo a data e hora atuais
-    agora = datetime.now().strftime("%Y%m%d_%H%M%S")
-    nome_arquivo = f"{caminho_base}/resultados_{vetorizador}_{classificador}_{agora}.csv"
+# def adicionar_ao_csv(dados, caminho_base, vetorizador, classificador):
+#     # Obtendo a data e hora atuais
+#     agora = datetime.now().strftime("%Y%m%d_%H%M%S")
+#     nome_arquivo = f"{caminho_base}/resultados_{vetorizador}_{classificador}_{agora}.csv"
     
-    df_temp = pd.DataFrame([dados])
-    df_temp.to_csv(nome_arquivo, index=False)
+#     df_temp = pd.DataFrame([dados])
+#     df_temp.to_csv(nome_arquivo, index=False)
 
 
 # # Para vetorizadores TF-IDF e BoW
@@ -330,16 +362,18 @@ def adicionar_ao_csv(dados, caminho_base, vetorizador, classificador):
 #         scores = cross_val_score(classifier, X_combined, y, cv=5, scoring='f1')
 #         print(f"{vect_name}, {clf_name}: Média F1 Score = {np.mean(scores)}")
 
+
+
 for vect_name, classifier_dict in {'TF-IDF': classifiers_tfidf, 'BoW': classifiers_bow}.items():
     for clf_name, classifier in classifier_dict.items():
         print(f"Iniciando -> {vect_name}, {clf_name}")
 
         # Configurando o vetorizador
-        ngram_range = best_ngrams[f'{vect_name}_{clf_name}']
+        ngram_range = best_ngrams_full[f'{vect_name}_{clf_name}']
         vectorizer = TfidfVectorizer(ngram_range=ngram_range) if vect_name == 'TF-IDF' else CountVectorizer(ngram_range=ngram_range)
 
         # Escolhendo as features numéricas apropriadas
-        colunas_a_incluir = colunas_numericas.get(clf_name, [])
+        colunas_a_incluir = colunas_numericas_full.get(clf_name, [])
         X_numeric = yelp_df_sample[colunas_a_incluir].values if colunas_a_incluir else None
 
         # Transformando o texto e concatenando com as features numéricas
@@ -399,7 +433,7 @@ for clf_name, classifier in classifiers_word2vec.items():
     print(f"Iniciando Word2Vec, {clf_name}")
 
     # Escolhendo as features numéricas apropriadas
-    colunas_a_incluir = colunas_numericas.get(clf_name, [])
+    colunas_a_incluir = colunas_numericas_full.get(clf_name, [])
     X_numeric = yelp_df_sample[colunas_a_incluir].values if colunas_a_incluir else None
     X_combined = np.hstack((X_transformed, X_numeric)) if X_numeric is not None else X_transformed
 

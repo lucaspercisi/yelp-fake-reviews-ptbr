@@ -104,33 +104,33 @@ X = yelp_df_sample['cleaned_content']
 y = yelp_df_sample['fake_review'].values
 
 classifiers_params = {
-    # 'Random Forest': {
-    #     'classifier': RandomForestClassifier(n_jobs=-1),
-    #     'params': {
-    #         'classifier__n_estimators': [None, 500, 1000],
-    #         'classifier__max_depth': [None, 1000],
-    #         'classifier__min_samples_split': [1, 2, 3],
-    #         'classifier__min_samples_leaf': [1, 2]
-    #     }
-    # },
-    # 'Logistic Regression': {
-    #     'classifier': LogisticRegression(n_jobs=-1),
-    #     'params': {
-    #         'classifier__C': [10, 500, 1000, 2000],
-    #         'classifier__penalty': ['l2', 'l1', 'elasticnet'],
-    #         'classifier__solver': ['newton-cg', 'saga', 'elasticnet'],
-    #         'classifier__l1_ratio': [None, 0.5, 0.75]  # Usado apenas se penalty='elasticnet'
-    #     }
-    # },
-    # 'KNN': {
-    #     'classifier': KNeighborsClassifier(n_jobs=-1),
-    #     'params': {
-    #         'classifier__n_neighbors': [3, 5, 13, 17],
-    #         'classifier__weights': ['uniform', 'distance'],
-    #         'classifier__metric': ['euclidean', 'manhattan', 'minkowski'],
-    #         'classifier__p': [1, 2]
-    #     }
-    # },
+    'Random Forest': {
+        'classifier': RandomForestClassifier(n_jobs=-1),
+        'params': {
+            'classifier__n_estimators': [None, 500, 1000],
+            'classifier__max_depth': [None, 1000],
+            'classifier__min_samples_split': [1, 2, 3],
+            'classifier__min_samples_leaf': [1, 2]
+        }
+    },
+    'Logistic Regression': {
+        'classifier': LogisticRegression(n_jobs=-1),
+        'params': {
+            'classifier__C': [10, 500, 1000, 2000],
+            'classifier__penalty': ['l2', 'l1', 'elasticnet'],
+            'classifier__solver': ['newton-cg', 'saga', 'elasticnet'],
+            'classifier__l1_ratio': [None, 0.5, 0.75]  # Usado apenas se penalty='elasticnet'
+        }
+    },
+    'KNN': {
+        'classifier': KNeighborsClassifier(n_jobs=-1),
+        'params': {
+            'classifier__n_neighbors': [3, 5, 13, 17],
+            'classifier__weights': ['uniform', 'distance'],
+            'classifier__metric': ['euclidean', 'manhattan', 'minkowski'],
+            'classifier__p': [1, 2]
+        }
+    },
     'XGBoost': {
         'classifier': XGBClassifier(n_jobs=-1),
         'params': {
@@ -163,9 +163,9 @@ classifiers_params = {
 # }
 
 best_ngrams_full = {
-    # 'TF-IDF_Random Forest': (1, 3),
-    # 'TF-IDF_Logistic Regression': (1, 1),
-    # 'TF-IDF_KNN': (2, 2),
+    'TF-IDF_Random Forest': (1, 3),
+    'TF-IDF_Logistic Regression': (1, 1),
+    'TF-IDF_KNN': (2, 2),
     'TF-IDF_XGBoost': (1, 3),
     'TF-IDF_SVC': (1, 1),
     'BoW_Random Forest': (1, 3),
@@ -184,7 +184,8 @@ vectorizers = {
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 best_results  = {}
 
-for vect_name in ['TF-IDF', 'BoW']:
+# for vect_name in ['TF-IDF', 'BoW']:
+for vect_name in ['BoW']:
     for clf_name in classifiers_params:
         # Selecionando o ngram_range com base no vetorizador e classificador
         ngram_range = best_ngrams_full[f'{vect_name}_{clf_name}']
@@ -202,7 +203,7 @@ for vect_name in ['TF-IDF', 'BoW']:
         ])
 
         # Configurando e executando o GridSearchCV
-        grid_search = GridSearchCV(pipeline, classifiers_params[clf_name]['params'], cv=cv, scoring=make_scorer(f1_score), verbose=2)
+        grid_search = GridSearchCV(pipeline, classifiers_params[clf_name]['params'], cv=cv, scoring=make_scorer(f1_score), verbose=3)
         grid_search.fit(X, y)
 
         # Imprimindo os resultados
