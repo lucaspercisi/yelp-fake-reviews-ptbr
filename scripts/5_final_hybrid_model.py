@@ -71,8 +71,8 @@ def clean_text_en(text):
     return text
 
     
-# url_dataset = 'https://raw.githubusercontent.com/lucaspercisi/yelp-fake-reviews-ptbr/main/Datasets/portuguese/yelp-fake-reviews-dataset-pt-pos-tagged.csv'
-url_dataset = 'https://raw.githubusercontent.com/lucaspercisi/yelp-fake-reviews-ptbr/main/Datasets/english/yelp-fake-reviews-dataset-en.csv'
+url_dataset = 'https://raw.githubusercontent.com/lucaspercisi/yelp-fake-reviews-ptbr/main/Datasets/portuguese/yelp-fake-reviews-dataset-pt-pos-tagged.csv'
+# url_dataset = 'https://raw.githubusercontent.com/lucaspercisi/yelp-fake-reviews-ptbr/main/Datasets/english/yelp-fake-reviews-dataset-en.csv'
 yelp_df = pd.read_csv(url_dataset)
 
 # #Contando pontuação
@@ -85,7 +85,7 @@ yelp_df['capital_count'] = yelp_df['content'].apply(lambda x: len([c for c in st
 yelp_df['word_count'] = yelp_df['content'].apply(lambda x: len(str(x).split(" ")))
 
 #limpando conteudo textual
-yelp_df['cleaned_content'] = yelp_df['content'].apply(clean_text_en)
+yelp_df['cleaned_content'] = yelp_df['content'].apply(clean_text)
 
 #limpando conteudo textual com tag gramtical e convertendo para string
 # yelp_df['cleaned_content_tagged'] = yelp_df['content_tagged'].apply(extract_words_from_tagged_content)
@@ -106,7 +106,8 @@ else:
     df_verdadeiros = df_verdadeiros.sample(num_falsos, random_state=42)
 
 yelp_df_balanceado = pd.concat([df_falsos, df_verdadeiros])
-yelp_df_sample = yelp_df_balanceado.copy()
+# yelp_df_sample = yelp_df_balanceado.copy()
+yelp_df_sample = yelp_df.copy()
 
 
 X = yelp_df_sample['cleaned_content']
@@ -234,14 +235,6 @@ classifiers_word2vec = {
     'XGBoost': XGBClassifier(n_jobs=-1, **best_params['Word2Vec']['XGBoost'])
 }
 
-# colunas_numericas = {
-#     'XGBoost': ['qtd_friends', 'qtd_reviews', 'qtd_photos'],
-#     'KNN': ['qtd_reviews', 'qtd_photos'],
-#     'Random Forest': ['qtd_friends', 'qtd_reviews', 'qtd_photos'],
-#     'Logistic Regression': ['qtd_friends', 'qtd_reviews', 'word_count'],
-#     'SVC': ['qtd_friends', 'qtd_reviews', 'qtd_photos']
-# }
-
 colunas_numericas_full = {
     'Random Forest': ['qtd_friends', 'qtd_reviews', 'qtd_photos'],
     'Logistic Regression': ['qtd_friends', 'qtd_reviews', 'user_has_photo', 'word_count'],
@@ -249,18 +242,6 @@ colunas_numericas_full = {
     'SVC': ['qtd_friends', 'qtd_reviews', 'qtd_photos', 'punctuation_count', 'word_count'],
     'XGBoost': ['qtd_friends', 'qtd_reviews', 'qtd_photos']
 }
-
-
-# best_ngrams = {
-#     'TF-IDF_Random Forest': (3, 3),
-#     'TF-IDF_Logistic Regression': (1, 1),
-#     'TF-IDF_KNN': (3, 3),
-#     'TF-IDF_XGBoost': (1, 3),
-#     'BoW_Random Forest': (3, 3),
-#     'BoW_Logistic Regression': (1, 2),
-#     'BoW_KNN': (1, 1),
-#     'BoW_XGBoost': (1, 1)
-# }
 
 best_ngrams_full = {
     'TF-IDF_Random Forest': (1, 3),
@@ -309,7 +290,7 @@ def run_and_save_results(clf, X, y, classifier_name, vectorizer, results_df, fea
     # Preparando os resultados
     features_used = ', '.join(features_useds.columns)
     results = {
-        'scenario' : 'en_equal',
+        'scenario' : 'pt_non_equal',
         'classifier': classifier_name,
         'vectorizer': vectorizer,
         'features_used': features_used,
@@ -339,7 +320,7 @@ def run_and_save_results(clf, X, y, classifier_name, vectorizer, results_df, fea
     updated_results_df = pd.concat([results_df, pd.DataFrame([results])], axis=0, ignore_index=True)
 
     agora = datetime.now().strftime("%Y%m%d_%H%M%S")
-    nome_arquivo = f"{caminho_base}/resultados_en_equal_{agora}_final_certo.csv"
+    nome_arquivo = f"{caminho_base}/resultados_pt_non_equal_{agora}_final_certo.csv"
     
     updated_results_df.to_csv(nome_arquivo, index=False)
     
@@ -414,7 +395,18 @@ for clf_name, classifier in classifiers_word2vec.items():
     # Escolhendo as features numéricas apropriadas
     colunas_a_incluir = colunas_numericas_full.get(clf_name, [])
     X_numeric = yelp_df_sample[colunas_a_incluir].values if colunas_a_incluir else None
-    X_combined = hstack((X_transformed, X_numeric)) if X_numeric is not None else X_transformed
+    
+    if X_numeric is not None:
+        X_numeric = X_numeric.astype(float)
+
+        # Transforma X_numeric em uma matriz esparsa
+        X_numeric_sparse = csr_matrix(X_numeric)
+    
+        # Combina as matrizes esparsas
+        X_combined = hstack([X_transformed, X_numeric_sparse])
+
+
+    # X_combined = hstack((X_transformed, X_numeric)) if X_numeric is not None else X_transformed
 
     # Executando o classificador e salvando os resultados
     features_used = pd.DataFrame(X_numeric, columns=colunas_a_incluir)
