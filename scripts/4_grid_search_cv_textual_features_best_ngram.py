@@ -97,15 +97,15 @@ X = yelp_df_sample['cleaned_content']
 y = yelp_df_sample['fake_review'].values
 
 classifiers_params = {
-    # 'Random Forest': { OK
-    #     'classifier': RandomForestClassifier(n_jobs=-1),
-    #     'params': {
-    #         'classifier__n_estimators': [None, 500, 1000],
-    #         'classifier__max_depth': [None, 1000],
-    #         'classifier__min_samples_split': [1, 3],
-    #         'classifier__min_samples_leaf': [1, 3]
-    #     }
-    # },
+    'Random Forest': {
+        'classifier': RandomForestClassifier(n_jobs=-1),
+        'params': {
+            'classifier__n_estimators': [None, 500, 1000],
+            'classifier__max_depth': [None, 1000],
+            'classifier__min_samples_split': [1, 3],
+            'classifier__min_samples_leaf': [1, 3]
+        }
+    }
     # 'Logistic Regression': {
     #     'classifier': LogisticRegression(n_jobs=-1),
     #     'params': {
@@ -125,21 +125,21 @@ classifiers_params = {
     # 'XGBoost': {
     #     'classifier': XGBClassifier(n_jobs=-1),
     #     'params': {
-    #         'classifier__learning_rate': [0.01, 0.1],
+    #         'classifier__learning_rate': [0.1, 0.5, 1],
     #         'classifier__n_estimators': [500, 1000],
-    #         'classifier__max_depth': [None, 9, 15],
+    #         'classifier__max_depth': [None, 3, 7],
     #         'classifier__min_child_weight': [1, 5, 10]
     #     }
     # }
-    'SVC': {
-        'classifier': SVC(),
-        'params': {
-            'classifier__C': [50, 100],
-            'classifier__kernel': ['rbf', 'poly', 'sigmoid'],
-            'classifier__gamma': ['scale', 'auto'],
-            'classifier__max_iter': [1000, 2000, 5000] 
-        }
-    }
+    # 'SVC': {
+    #     'classifier': SVC(),
+    #     'params': {
+    #         'classifier__C': [50, 100],
+    #         'classifier__kernel': ['rbf', 'poly', 'sigmoid'],
+    #         'classifier__gamma': ['scale', 'auto'],
+    #         'classifier__max_iter': [1000, 2000, 5000] 
+    #     }
+    # }
 }
 
 # best_ngrams = {

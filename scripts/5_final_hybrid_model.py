@@ -121,12 +121,12 @@ best_params = {
         #     'min_samples_split': 3,
         #     'n_estimators': 500
         # },
-        # 'Logistic Regression': {
-        #     'C': 10,
-        #     'solver': 'saga',
-        #     'penalty': 'l2',
-        #     'max_iter': 5000
-        # },
+        'Logistic Regression': {
+            'C': 1,
+            'solver': 'newton-cg',
+            'penalty': 'l2',
+            'max_iter': 2000
+        },
         'KNN': {
             'metric': 'euclidean',
             'n_neighbors': 17,
@@ -139,12 +139,12 @@ best_params = {
             'kernel': 'rbf',
             'max_iter': 2000
         },
-        # 'XGBoost': {
-        #     'learning_rate': 0.01,
-        #     'max_depth': 15,
-        #     'n_estimators': 1000,
-        #     'min_child_weight': 10
-        # }
+        'XGBoost': {
+            'learning_rate': 0.01,
+            'max_depth': 15,
+            'n_estimators': 1000,
+            'min_child_weight': 10
+        }
     },
     'BoW': {
         # 'Random Forest': {
@@ -153,29 +153,29 @@ best_params = {
         #     'min_samples_split': 2,
         #     'n_estimators': 1000
         # },
-        # 'Logistic Regression': {
-        #     'C': 2000,
-        #     'penalty': 'l2',
-        #     'solver': 'newton-cg',
-        #     'max_iter': 5000
-        # },
+        'Logistic Regression': {
+            'C': 1,
+            'penalty': 'l2',
+            'solver': 'newton-cg',
+            'max_iter': 2000
+        },
         'KNN': {
             'metric': 'euclidean',
             'n_neighbors': 3,
             'weights': 'uniform'
         },
-        # 'SVC': {
-        #     'C': 500,
-        #     'gamma': 'auto',
-        #     'kernel': 'rbf',
-        #     'max_iter': 5000
-        # },
-        # 'XGBoost': {
-        #     'learning_rate': 0.01,
-        #     'max_depth': None,
-        #     'min_child_weight': 1,
-        #     'n_estimators': 500
-        # }
+        'SVC': {
+            'C': 100,
+            'gamma': 'auto',
+            'kernel': 'rbf',
+            'max_iter': 5000
+        },
+        'XGBoost': {
+            'learning_rate': 0.01,
+            'max_depth': None,
+            'min_child_weight': 1,
+            'n_estimators': 500
+        }
     },
     'Word2Vec': {
         # 'Random Forest': {
@@ -184,29 +184,29 @@ best_params = {
         #     'min_samples_split': 3,
         #     'n_estimators': 1000
         # },
-        # 'Logistic Regression': {
-        #     'C': 3000,
-        #     'solver': 'newton-cg',
-        #     'penalty': 'l2',
-        #     'max_iter': 5000
-        # },
+        'Logistic Regression': {
+            'C': 500,
+            'solver': 'newton-cg',
+            'penalty': 'l2',
+            'max_iter': 5000
+        },
         'KNN': {
             'metric': 'euclidean',
             'n_neighbors': 17,
             'weights': 'distance'
         },
-        # 'SVC': {
-        #     'C': 100,
-        #     'gamma': 'scale',
-        #     'kernel': 'rbf',
-        #     'max_iter': 5000
-        # },
-        # 'XGBoost': {
-        #     'learning_rate': 0.01,
-        #     'max_depth': 9,
-        #     'min_child_weight': 10,
-        #     'n_estimators': 500
-        # }
+        'SVC': {
+            'C': 50,
+            'gamma': 'auto',
+            'kernel': 'poly',
+            'max_iter': 1000
+        },
+        'XGBoost': {
+            'learning_rate': 0.01,
+            'max_depth': 9,
+            'min_child_weight': 10,
+            'n_estimators': 500
+        }
     }
 }
 
