@@ -92,12 +92,12 @@ yelp_df['cleaned_content'] = yelp_df['content'].apply(clean_text_en)
 
 # yelp_df_sample = yelp_df.groupby('fake_review').sample(frac=0.1, random_state=42)
 
-df_falsos = yelp_df[yelp_df['fake_review'] == False]
-df_verdadeiros = yelp_df[yelp_df['fake_review'] == True]
+df_falsos = yelp_df[yelp_df['fake_review'] == True]            
+df_verdadeiros = yelp_df[yelp_df['fake_review'] == False]            
 
 # Contando o número de registros em cada classe
-num_falsos = df_falsos.shape[0]
-num_verdadeiros = df_verdadeiros.shape[0]
+num_falsos = df_falsos.shape[0] 28
+num_verdadeiros = df_verdadeiros.shape[0] 14
 
 # Amostrando aleatoriamente da classe com mais registros
 if num_falsos > num_verdadeiros:
@@ -115,123 +115,123 @@ y = yelp_df_sample['fake_review'].values
 
 best_params = {
     'TF-IDF': {
-        'Random Forest': {
-            'max_depth': 1000,
-            'min_samples_leaf': 1,
-            'min_samples_split': 3,
-            'n_estimators': 500
-        },
-        'Logistic Regression': {
-            'C': 10,
-            'solver': 'saga',
-            'penalty': 'l2',
-            'max_iter': 5000
-        },
+        # 'Random Forest': {
+        #     'max_depth': 1000,
+        #     'min_samples_leaf': 1,
+        #     'min_samples_split': 3,
+        #     'n_estimators': 500
+        # },
+        # 'Logistic Regression': {
+        #     'C': 10,
+        #     'solver': 'saga',
+        #     'penalty': 'l2',
+        #     'max_iter': 5000
+        # },
         'KNN': {
             'metric': 'euclidean',
-            'n_neighbors': 3,
+            'n_neighbors': 17,
             'weights': 'uniform',
             'p': 1
         },
         'SVC': {
-            'C': 0.1,
-            'gamma': 'scale',
+            'C': 100,
+            'gamma': 'auto',
             'kernel': 'rbf',
-            'max_iter': 1000
+            'max_iter': 2000
         },
-        'XGBoost': {
-            'learning_rate': 0.01,
-            'max_depth': 15,
-            'n_estimators': 1000,
-            'min_child_weight': 10
-        }
+        # 'XGBoost': {
+        #     'learning_rate': 0.01,
+        #     'max_depth': 15,
+        #     'n_estimators': 1000,
+        #     'min_child_weight': 10
+        # }
     },
     'BoW': {
-        'Random Forest': {
-            'max_depth': 1000,
-            'min_samples_leaf': 1,
-            'min_samples_split': 2,
-            'n_estimators': 1000
-        },
-        'Logistic Regression': {
-            'C': 2000,
-            'penalty': 'l2',
-            'solver': 'newton-cg',
-            'max_iter': 5000
-        },
+        # 'Random Forest': {
+        #     'max_depth': 1000,
+        #     'min_samples_leaf': 1,
+        #     'min_samples_split': 2,
+        #     'n_estimators': 1000
+        # },
+        # 'Logistic Regression': {
+        #     'C': 2000,
+        #     'penalty': 'l2',
+        #     'solver': 'newton-cg',
+        #     'max_iter': 5000
+        # },
         'KNN': {
             'metric': 'euclidean',
             'n_neighbors': 3,
             'weights': 'uniform'
         },
-        'SVC': {
-            'C': 500,
-            'gamma': 'auto',
-            'kernel': 'rbf',
-            'max_iter': 5000
-        },
-        'XGBoost': {
-            'learning_rate': 0.01,
-            'max_depth': None,
-            'min_child_weight': 1,
-            'n_estimators': 500
-        }
+        # 'SVC': {
+        #     'C': 500,
+        #     'gamma': 'auto',
+        #     'kernel': 'rbf',
+        #     'max_iter': 5000
+        # },
+        # 'XGBoost': {
+        #     'learning_rate': 0.01,
+        #     'max_depth': None,
+        #     'min_child_weight': 1,
+        #     'n_estimators': 500
+        # }
     },
     'Word2Vec': {
-        'Random Forest': {
-            'max_depth': None,
-            'min_samples_leaf': 1,
-            'min_samples_split': 3,
-            'n_estimators': 1000
-        },
-        'Logistic Regression': {
-            'C': 3000,
-            'solver': 'newton-cg',
-            'penalty': 'l2',
-            'max_iter': 5000
-        },
+        # 'Random Forest': {
+        #     'max_depth': None,
+        #     'min_samples_leaf': 1,
+        #     'min_samples_split': 3,
+        #     'n_estimators': 1000
+        # },
+        # 'Logistic Regression': {
+        #     'C': 3000,
+        #     'solver': 'newton-cg',
+        #     'penalty': 'l2',
+        #     'max_iter': 5000
+        # },
         'KNN': {
             'metric': 'euclidean',
-            'n_neighbors': 25,
+            'n_neighbors': 17,
             'weights': 'distance'
         },
-        'SVC': {
-            'C': 100,
-            'gamma': 'scale',
-            'kernel': 'rbf',
-            'max_iter': 5000
-        },
-        'XGBoost': {
-            'learning_rate': 0.01,
-            'max_depth': 9,
-            'min_child_weight': 10,
-            'n_estimators': 500
-        }
+        # 'SVC': {
+        #     'C': 100,
+        #     'gamma': 'scale',
+        #     'kernel': 'rbf',
+        #     'max_iter': 5000
+        # },
+        # 'XGBoost': {
+        #     'learning_rate': 0.01,
+        #     'max_depth': 9,
+        #     'min_child_weight': 10,
+        #     'n_estimators': 500
+        # }
     }
 }
 
 classifiers_tfidf = {
-    'Random Forest': RandomForestClassifier(n_jobs=-1, **best_params['TF-IDF']['Random Forest']), #REFAZER
-    'Logistic Regression': LogisticRegression(n_jobs=-1, **best_params['TF-IDF']['Logistic Regression']),
-    'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['TF-IDF']['KNN']),
+    'Random Forest': RandomForestClassifier(**best_params['TF-IDF']['Random Forest']), #REFAZER
+    'Logistic Regression': LogisticRegression(**best_params['TF-IDF']['Logistic Regression']),
+    'KNN': KNeighborsClassifier(**best_params['TF-IDF']['KNN']),
     'SVC': SVC(**best_params['TF-IDF']['SVC']),
-    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['TF-IDF']['XGBoost'])
+    'XGBoost': XGBClassifier(**best_params['TF-IDF']['XGBoost'])
 }
 
 classifiers_bow = {
-    'Random Forest': RandomForestClassifier(n_jobs=-1, **best_params['BoW']['Random Forest']),
-    'Logistic Regression': LogisticRegression(n_jobs=-1, **best_params['BoW']['Logistic Regression']),
-    'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['BoW']['KNN']),
+    'Random Forest': RandomForestClassifier(**best_params['BoW']['Random Forest']),
+    'Logistic Regression': LogisticRegression(**best_params['BoW']['Logistic Regression']),
+    'KNN': KNeighborsClassifier(**best_params['BoW']['KNN']),
     'SVC': SVC(**best_params['BoW']['SVC']),
-    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['BoW']['XGBoost'])
+    'XGBoost': XGBClassifier(**best_params['BoW']['XGBoost'])
 }
 
 classifiers_word2vec = {
-    'Random Forest': RandomForestClassifier(n_jobs=-1, **best_params['Word2Vec']['Random Forest']),
-    'Logistic Regression': LogisticRegression(n_jobs=-1, **best_params['Word2Vec']['Logistic Regression']),
-    'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['Word2Vec']['KNN']),
+    'Random Forest': RandomForestClassifier(**best_params['Word2Vec']['Random Forest']),
+    'Logistic Regression': LogisticRegression(**best_params['Word2Vec']['Logistic Regression']),
+    'KNN': KNeighborsClassifier(**best_params['Word2Vec']['KNN']),
     'SVC': SVC(**best_params['Word2Vec']['SVC']),
-    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['Word2Vec']['XGBoost'])
+    'XGBoost': XGBClassifier(**best_params['Word2Vec']['XGBoost'])
 }
 
 # colunas_numericas = {
@@ -304,12 +304,12 @@ def run_and_save_results(clf, X, y, classifier_name, vectorizer, results_df, fea
     }
     
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-    cv_results = cross_validate(clf, X, y, cv=cv, scoring=scorers, return_train_score=False, verbose=3, n_jobs=10)
+    cv_results = cross_validate(clf, X, y, cv=cv, scoring=scorers, return_train_score=False, verbose=3, n_jobs=-1)
 
     # Preparando os resultados
     features_used = ', '.join(features_useds.columns)
     results = {
-            'scenario' : 'en_equal',
+        'scenario' : 'en_equal',
         'classifier': classifier_name,
         'vectorizer': vectorizer,
         'features_used': features_used,

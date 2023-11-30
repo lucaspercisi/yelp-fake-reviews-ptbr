@@ -72,8 +72,8 @@ yelp_df['word_count'] = yelp_df['content'].apply(lambda x: len(str(x).split(" ")
 # yelp_df_sample = yelp_df.groupby('fake_review').sample(frac=0.1, random_state=42)
 
 # Separando o DataFrame por classe
-df_falsos = yelp_df[yelp_df['fake_review'] == False]
-df_verdadeiros = yelp_df[yelp_df['fake_review'] == True]
+df_falsos = yelp_df[yelp_df['fake_review'] == True]
+df_verdadeiros = yelp_df[yelp_df['fake_review'] == False]
 
 # Contando o número de registros em cada classe
 num_falsos = df_falsos.shape[0]
@@ -98,20 +98,32 @@ y = yelp_df_sample['fake_review'].values
 
 best_params = {
     'Random Forest': {
-        'n_estimators': 1000, 
+        # 'n_estimators': 1000, 
+        # 'max_depth': None,
+        # 'min_samples_split': 2,
+        # 'min_samples_leaf': 1
         'max_depth': None,
+        'min_samples_leaf': 1,
         'min_samples_split': 2,
-        'min_samples_leaf': 1
+        'n_estimators': 1000
     },
     'Logistic Regression': {
-        'C': 500,
+        # 'C': 500,
+        # 'penalty': 'l2',
+        # 'solver': 'newton-cg',
+        # 'l1_ratio': None
+        'C': 250,
+        'max_iter': 2000,
         'penalty': 'l2',
-        'solver': 'newton-cg',
-        'l1_ratio': None
+        'solver': 'lbfgs'
     },
     'KNN': {
-        'n_neighbors': 17,
-        'weights': 'distance',
+        # 'n_neighbors': 17,
+        # 'weights': 'distance',
+        # 'metric': 'manhattan',
+        # 'p': 1 
+        'n_neighbors': 13,
+        'weights': 'uniform',
         'metric': 'manhattan',
         'p': 1 
     },
@@ -121,19 +133,23 @@ best_params = {
         'max_depth': 11
     },
     'SVC': {
-        'C': 0.1,
-        'kernel': 'sigmoid',
+        # 'C': 0.1,
+        # 'kernel': 'sigmoid',
+        # 'gamma': 'scale', 
+        # 'max_iter': 1000
+        'C': 100,
+        'max_iter': 5000,
         'gamma': 'scale', 
-        'max_iter': 1000
+        'kernel': 'rbf'
     }
 }
 
 classifiers = {
-    'Random Forest': RandomForestClassifier(n_jobs=-1, **best_params['Random Forest']),
-    'Logistic Regression': LogisticRegression(n_jobs=-1, **best_params['Logistic Regression']),
-    'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['KNN']),
+    # 'Random Forest': RandomForestClassifier(n_jobs=-1, **best_params['Random Forest']),
+    # 'Logistic Regression': LogisticRegression(n_jobs=-1, **best_params['Logistic Regression']),
+    # 'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['KNN']),
     'XGBoost': XGBClassifier(n_jobs=-1, **best_params['XGBoost']),
-    'SVC': SVC(**best_params['SVC'])
+    # 'SVC': SVC(**best_params['SVC'])
 }
 
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -157,7 +173,7 @@ for classifier_name, classifier in classifiers.items():
             classifier.fit(X_train, y_train)
 
             # Calcular a importância de permutação
-            perm_importance = permutation_importance(classifier, X_test, y_test, n_repeats=5, random_state=42)
+            perm_importance = permutation_importance(classifier, X_test, y_test, n_repeats=5, random_state=42, n_jobs=-1)
             feature_importances += perm_importance.importances_mean
 
         # Determinar a feature menos importante
@@ -166,7 +182,7 @@ for classifier_name, classifier in classifiers.items():
 
         # Remover a feature menos importante e reavaliar o desempenho
         features_to_test.remove(least_important_feature)
-        mean_f1_score = np.mean(cross_val_score(classifier, X[features_to_test], y, cv=cv, scoring='f1', verbose=2))
+        mean_f1_score = np.mean(cross_val_score(classifier, X[features_to_test], y, cv=cv, scoring='f1', verbose=3, n_jobs=-1))
 
         # Atualizar o melhor conjunto de features
         if mean_f1_score > best_f1_score:

@@ -75,8 +75,8 @@ yelp_df['word_count'] = yelp_df['content'].apply(lambda x: len(str(x).split(" ")
 
 
 # Separando o DataFrame por classe
-df_falsos = yelp_df[yelp_df['fake_review'] == False]
-df_verdadeiros = yelp_df[yelp_df['fake_review'] == True]
+df_falsos = yelp_df[yelp_df['fake_review'] == True]
+df_verdadeiros = yelp_df[yelp_df['fake_review'] == False]
 
 # Contando o número de registros em cada classe
 num_falsos = df_falsos.shape[0]
@@ -96,40 +96,41 @@ X = yelp_df_sample[['qtd_friends', 'qtd_reviews', 'qtd_photos',	'rating', 'user_
 y = yelp_df_sample['fake_review'].values  
 
 param_grid = {
-    'Random Forest': {
-        'classifier': [RandomForestClassifier(n_jobs=-1)],
-        'classifier__n_estimators': [None, 100, 200, 1000],
-        'classifier__max_depth': [None, 50, 100],
-        'classifier__min_samples_split': [0, 1, 2, 10],
-        'classifier__min_samples_leaf': [0, 1, 10]
-    },
+    # 'Random Forest': {
+    #     'classifier': [RandomForestClassifier(n_jobs=-1)],
+    #     'classifier__n_estimators': [None, 100, 200, 1000],
+    #     'classifier__max_depth': [None, 50, 100],
+    #     'classifier__min_samples_split': [0, 1, 2, 10],
+    #     'classifier__min_samples_leaf': [0, 1, 10]
+    # }
     'Logistic Regression': {
-        'classifier': [LogisticRegression()],
-        'classifier__C': [500, 1000, 2000, 5000],
-        'classifier__penalty': ['l2'],
-        'classifier__solver': ['newton-cg'],
-        'classifier__l1_ratio': [None, 0.5]  # Usado apenas se penalty='elasticnet'
-    },
-    'KNN': {
-        'classifier': [KNeighborsClassifier(n_jobs=-1)],
-        'classifier__n_neighbors': [3, 5, 13, 17],
-        'classifier__weights': ['uniform', 'distance'],
-        'classifier__metric': ['euclidean', 'manhattan', 'minkowski'],
-        'classifier__p': [1, 2]  # Parâmetro de potência para a métrica Minkowski
-    },
-    'XGBoost': {
-        'classifier': [XGBClassifier(n_jobs=-1)],
-        'classifier__learning_rate': [0.01, 0.005, 0.001],
-        'classifier__n_estimators': [500, 1000, 1500],
-        'classifier__max_depth': [7, 11, 15, 27]
-    },
-    'SVC': {
-        'classifier': [SVC()],
-        'classifier__C': [0.1, 1, 10, 100],
-        'classifier__kernel': ['rbf', 'poly', 'sigmoid'],
-        'classifier__gamma': ['scale', 'auto'],
-        'classifier__max_iter': [10, 100, 1000, 1000] 
+        'classifier': [LogisticRegression(n_jobs=-1)],
+        'classifier__C': [0.1, 10, 250, 500],
+        'classifier__penalty': ['l2', 'l1'],
+        'classifier__solver': ['newton-cg', 'saga', 'lbfgs'],
+        'classifier__max_iter': [2000, 5000],
     }
+
+    # 'KNN': {
+    #     'classifier': [KNeighborsClassifier(n_jobs=-1)],
+    #     'classifier__n_neighbors': [3, 5, 13, 17],
+    #     'classifier__weights': ['uniform', 'distance'],
+    #     'classifier__metric': ['euclidean', 'manhattan', 'minkowski'],
+    #     'classifier__p': [1, 2]  # Parâmetro de potência para a métrica Minkowski
+    # }
+    # 'XGBoost': {
+    #     'classifier': [XGBClassifier(n_jobs=-1)],
+    #     'classifier__learning_rate': [0.01, 0.005],
+    #     'classifier__n_estimators': [500, 1000],
+    #     'classifier__max_depth': [3, 7, 11, 15]
+    # }
+    # 'SVC': {
+    #     'classifier': [SVC()],
+    #     'classifier__C': [1, 10, 100, 1000],
+    #     'classifier__kernel': ['rbf', 'poly', 'sigmoid'],
+    #     'classifier__gamma': ['scale', 'auto'],
+    #     'classifier__max_iter': [1000, 2000, 5000] 
+    # }
     
 }
 
@@ -146,7 +147,7 @@ for classifier_name, parameters in param_grid.items():
     ])
 
     try:
-        grid_search = GridSearchCV(pipeline, parameters, cv=cv, scoring=make_scorer(f1_score), verbose=2)
+        grid_search = GridSearchCV(pipeline, parameters, cv=cv, scoring=make_scorer(f1_score), verbose=3)
         grid_search.fit(X, y)
 
         best_models[classifier_name] = {

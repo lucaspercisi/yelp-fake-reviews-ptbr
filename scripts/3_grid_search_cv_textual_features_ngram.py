@@ -43,14 +43,7 @@ def clean_text(text):
 
     return text
 
-def extract_words_from_tagged_content(tagged_content):
-    try:
-        content_list = ast.literal_eval(tagged_content)
-        processed_content = [f'{word.lower()}_{tag}' for word, tag in content_list if word.lower() not in string.punctuation and word.lower() not in stop_words_pt and word.strip() != '']
-        return ' '.join(processed_content)
-    except ValueError:
-        return ""
-    
+
 url_dataset = 'https://raw.githubusercontent.com/lucaspercisi/yelp-fake-reviews-ptbr/main/Datasets/portuguese/yelp-fake-reviews-dataset-pt-pos-tagged.csv'
 yelp_df = pd.read_csv(url_dataset)
 
@@ -72,8 +65,8 @@ yelp_df['cleaned_content'] = yelp_df['content'].apply(clean_text)
 # yelp_df_sample = yelp_df.groupby('fake_review').sample(frac=0.3, random_state=42)
 
 # Separando o DataFrame por classe
-df_falsos = yelp_df[yelp_df['fake_review'] == False]
-df_verdadeiros = yelp_df[yelp_df['fake_review'] == True]
+df_falsos = yelp_df[yelp_df['fake_review'] == True]
+df_verdadeiros = yelp_df[yelp_df['fake_review'] == False]
 
 # Contando o número de registros em cada classe
 num_falsos = df_falsos.shape[0]
@@ -97,11 +90,11 @@ y = yelp_df_sample['fake_review'].values
 
 
 classifiers = {
-    'Random Forest': RandomForestClassifier(n_jobs=-1),
-    'Logistic Regression': LogisticRegression(n_jobs=-1),
-    'KNN': KNeighborsClassifier(n_jobs=-1),
+    # 'Random Forest': RandomForestClassifier(),
+    # 'Logistic Regression': LogisticRegression(n_jobs=-1),
+    # 'KNN': KNeighborsClassifier(n_jobs=-1),
     'XGBoost': XGBClassifier(n_jobs=-1),
-    'SVC': SVC(),
+    # 'SVC': SVC(),
 }
 
 n_grams = [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3)]
@@ -128,7 +121,7 @@ for vect_name, vectorizer in vectorizers.items():
             'vectorizer__ngram_range': n_grams
         }
 
-        grid_search = GridSearchCV(pipeline, params, cv=cv, scoring=make_scorer(f1_score), verbose=2)
+        grid_search = GridSearchCV(pipeline, params, cv=cv, scoring=make_scorer(f1_score), verbose=3)
 
         # Ajuste do GridSearchCV ao seu conjunto de dados textual
         # Substitua X_text e y pelos seus dados

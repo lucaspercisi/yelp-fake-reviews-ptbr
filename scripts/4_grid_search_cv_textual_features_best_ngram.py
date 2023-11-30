@@ -54,13 +54,6 @@ def clean_text(text):
 
     return text
 
-def extract_words_from_tagged_content(tagged_content):
-    try:
-        content_list = ast.literal_eval(tagged_content)
-        processed_content = [f'{word.lower()}_{tag}' for word, tag in content_list if word.lower() not in string.punctuation and word.lower() not in stop_words_pt and word.strip() != '']
-        return ' '.join(processed_content)
-    except ValueError:
-        return ""
     
 url_dataset = 'https://raw.githubusercontent.com/lucaspercisi/yelp-fake-reviews-ptbr/main/Datasets/portuguese/yelp-fake-reviews-dataset-pt-pos-tagged.csv'
 yelp_df = pd.read_csv(url_dataset)
@@ -82,8 +75,8 @@ yelp_df['cleaned_content'] = yelp_df['content'].apply(clean_text)
 
 # yelp_df_sample = yelp_df.groupby('fake_review').sample(frac=0.50, random_state=42)
 
-df_falsos = yelp_df[yelp_df['fake_review'] == False]
-df_verdadeiros = yelp_df[yelp_df['fake_review'] == True]
+df_falsos = yelp_df[yelp_df['fake_review'] == True]
+df_verdadeiros = yelp_df[yelp_df['fake_review'] == False]
 
 # Contando o número de registros em cada classe
 num_falsos = df_falsos.shape[0]
@@ -129,24 +122,24 @@ classifiers_params = {
     #         'classifier__metric': ['euclidean', 'manhattan']
     #     }
     # },
-    'XGBoost': {
-        'classifier': XGBClassifier(n_jobs=-1),
-        'params': {
-            'classifier__learning_rate': [0.01, 0.1],
-            'classifier__n_estimators': [500, 1000],
-            'classifier__max_depth': [None, 9, 15],
-            'classifier__min_child_weight': [1, 5, 10]
-        }
-    }
-    # 'SVC': {
-    #     'classifier': SVC(),
+    # 'XGBoost': {
+    #     'classifier': XGBClassifier(n_jobs=-1),
     #     'params': {
-    #         'classifier__C': [100, 500],
-    #         'classifier__kernel': ['rbf'],
-    #         'classifier__gamma': ['scale', 'auto'],
-    #         'classifier__max_iter': [5000, 10000] 
+    #         'classifier__learning_rate': [0.01, 0.1],
+    #         'classifier__n_estimators': [500, 1000],
+    #         'classifier__max_depth': [None, 9, 15],
+    #         'classifier__min_child_weight': [1, 5, 10]
     #     }
     # }
+    'SVC': {
+        'classifier': SVC(),
+        'params': {
+            'classifier__C': [50, 100],
+            'classifier__kernel': ['rbf', 'poly', 'sigmoid'],
+            'classifier__gamma': ['scale', 'auto'],
+            'classifier__max_iter': [1000, 2000, 5000] 
+        }
+    }
 }
 
 # best_ngrams = {
@@ -163,14 +156,14 @@ classifiers_params = {
 best_ngrams_full = {
     'TF-IDF_Random Forest': (1, 3),
     'TF-IDF_Logistic Regression': (1, 1),
-    'TF-IDF_KNN': (2, 2),
-    'TF-IDF_XGBoost': (1, 3),
+    'TF-IDF_KNN': (1, 1),
     'TF-IDF_SVC': (1, 1),
-    'BoW_Random Forest': (1, 3),
-    'BoW_Logistic Regression': (2, 3),
+    'TF-IDF_XGBoost': (1, 2),
+    'BoW_Random Forest': (1, 2),
+    'BoW_Logistic Regression': (1, 3),
     'BoW_KNN': (1, 1),
-    'BoW_XGBoost': (3, 3),
-    'BoW_SVC': (1, 2)
+    'BoW_SVC': (1, 2),
+    'BoW_XGBoost': (1, 3)
 }
 
 vectorizers = {
@@ -179,11 +172,11 @@ vectorizers = {
 }
 
 
-cv = StratifiedKFold(n_splits=4, shuffle=True, random_state=42)
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 best_results  = {}
 
-# for vect_name in ['TF-IDF', 'BoW']:
-for vect_name in ['BoW']:
+for vect_name in ['TF-IDF', 'BoW']:
+# for vect_name in ['BoW']:
     for clf_name in classifiers_params:
         # Selecionando o ngram_range com base no vetorizador e classificador
         ngram_range = best_ngrams_full[f'{vect_name}_{clf_name}']
@@ -249,7 +242,7 @@ for clf_name, data in classifiers_params.items():
 
     # Criando o modelo e o GridSearchCV
     classifier = data['classifier']
-    grid_search = GridSearchCV(classifier, data['params'], cv=cv, scoring=make_scorer(f1_score), verbose=2)
+    grid_search = GridSearchCV(classifier, data['params'], cv=cv, scoring=make_scorer(f1_score), verbose=3)
 
     # Ajuste do GridSearchCV ao conjunto de dados transformados pelo Word2Vec
     grid_search.fit(X_transformed, y)
