@@ -96,8 +96,8 @@ df_falsos = yelp_df[yelp_df['fake_review'] == True]
 df_verdadeiros = yelp_df[yelp_df['fake_review'] == False]            
 
 # Contando o número de registros em cada classe
-num_falsos = df_falsos.shape[0] 28
-num_verdadeiros = df_verdadeiros.shape[0] 14
+num_falsos = df_falsos.shape[0]
+num_verdadeiros = df_verdadeiros.shape[0]
 
 # Amostrando aleatoriamente da classe com mais registros
 if num_falsos > num_verdadeiros:
@@ -115,12 +115,12 @@ y = yelp_df_sample['fake_review'].values
 
 best_params = {
     'TF-IDF': {
-        # 'Random Forest': {
-        #     'max_depth': 1000,
-        #     'min_samples_leaf': 1,
-        #     'min_samples_split': 3,
-        #     'n_estimators': 500
-        # },
+        'Random Forest': {
+            'max_depth': 1000,
+            'min_samples_leaf': 1,
+            'min_samples_split': 3,
+            'n_estimators': 500
+        },
         'Logistic Regression': {
             'C': 1,
             'solver': 'newton-cg',
@@ -147,12 +147,12 @@ best_params = {
         }
     },
     'BoW': {
-        # 'Random Forest': {
-        #     'max_depth': 1000,
-        #     'min_samples_leaf': 1,
-        #     'min_samples_split': 2,
-        #     'n_estimators': 1000
-        # },
+        'Random Forest': {
+            'max_depth': 1000,
+            'min_samples_leaf': 1,
+            'min_samples_split': 2,
+            'n_estimators': 1000
+        },
         'Logistic Regression': {
             'C': 1,
             'penalty': 'l2',
@@ -178,12 +178,12 @@ best_params = {
         }
     },
     'Word2Vec': {
-        # 'Random Forest': {
-        #     'max_depth': None,
-        #     'min_samples_leaf': 1,
-        #     'min_samples_split': 3,
-        #     'n_estimators': 1000
-        # },
+        'Random Forest': {
+            'max_depth': None,
+            'min_samples_leaf': 1,
+            'min_samples_split': 3,
+            'n_estimators': 1000
+        },
         'Logistic Regression': {
             'C': 500,
             'solver': 'newton-cg',
@@ -245,8 +245,8 @@ classifiers_word2vec = {
 colunas_numericas_full = {
     'Random Forest': ['qtd_friends', 'qtd_reviews', 'qtd_photos'],
     'Logistic Regression': ['qtd_friends', 'qtd_reviews', 'user_has_photo', 'word_count'],
-    'KNN': ['qtd_friends', 'qtd_reviews', 'qtd_photos', 'punctuation_count', 'capital_count', 'word_count'],
-    'SVC': ['qtd_friends', 'qtd_reviews', 'qtd_photos', 'rating', 'punctuation_count', 'capital_count', 'word_count'],
+    'KNN': ['qtd_friends', 'qtd_reviews', 'qtd_photos'],
+    'SVC': ['qtd_friends', 'qtd_reviews', 'qtd_photos', 'punctuation_count', 'word_count'],
     'XGBoost': ['qtd_friends', 'qtd_reviews', 'qtd_photos']
 }
 
@@ -265,14 +265,14 @@ colunas_numericas_full = {
 best_ngrams_full = {
     'TF-IDF_Random Forest': (1, 3),
     'TF-IDF_Logistic Regression': (1, 1),
-    'TF-IDF_KNN': (2, 2),
-    'TF-IDF_XGBoost': (1, 3),
+    'TF-IDF_KNN': (1, 1),
     'TF-IDF_SVC': (1, 1),
-    'BoW_Random Forest': (1, 3),
-    'BoW_Logistic Regression': (2, 3),
+    'TF-IDF_XGBoost': (1, 2),
+    'BoW_Random Forest': (1, 2),
+    'BoW_Logistic Regression': (1, 3),
     'BoW_KNN': (1, 1),
-    'BoW_XGBoost': (3, 3),
-    'BoW_SVC': (1, 2)
+    'BoW_SVC': (1, 2),
+    'BoW_XGBoost': (1, 3)
 }
 
 vectorizers = {
@@ -339,7 +339,7 @@ def run_and_save_results(clf, X, y, classifier_name, vectorizer, results_df, fea
     updated_results_df = pd.concat([results_df, pd.DataFrame([results])], axis=0, ignore_index=True)
 
     agora = datetime.now().strftime("%Y%m%d_%H%M%S")
-    nome_arquivo = f"{caminho_base}/resultados_en_equal_{agora}.csv"
+    nome_arquivo = f"{caminho_base}/resultados_en_equal_{agora}_final_certo.csv"
     
     updated_results_df.to_csv(nome_arquivo, index=False)
     
