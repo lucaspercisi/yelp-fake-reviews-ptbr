@@ -211,27 +211,27 @@ best_params = {
 }
 
 classifiers_tfidf = {
-    'Random Forest': RandomForestClassifier(**best_params['TF-IDF']['Random Forest']), #REFAZER
-    'Logistic Regression': LogisticRegression(**best_params['TF-IDF']['Logistic Regression']),
-    'KNN': KNeighborsClassifier(**best_params['TF-IDF']['KNN']),
-    'SVC': SVC(**best_params['TF-IDF']['SVC']),
-    'XGBoost': XGBClassifier(**best_params['TF-IDF']['XGBoost'])
+    'Random Forest': RandomForestClassifier(n_jobs=-1, **best_params['TF-IDF']['Random Forest'], verbose=3), #REFAZER
+    'Logistic Regression': LogisticRegression(n_jobs=-1, **best_params['TF-IDF']['Logistic Regression'], verbose=3),
+    'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['TF-IDF']['KNN']),
+    'SVC': SVC(**best_params['TF-IDF']['SVC'], verbose=3),
+    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['TF-IDF']['XGBoost'])
 }
 
 classifiers_bow = {
-    'Random Forest': RandomForestClassifier(**best_params['BoW']['Random Forest']),
-    'Logistic Regression': LogisticRegression(**best_params['BoW']['Logistic Regression']),
-    'KNN': KNeighborsClassifier(**best_params['BoW']['KNN']),
-    'SVC': SVC(**best_params['BoW']['SVC']),
-    'XGBoost': XGBClassifier(**best_params['BoW']['XGBoost'])
+    'Random Forest': RandomForestClassifier(n_jobs=-1, **best_params['BoW']['Random Forest'], verbose=3),
+    'Logistic Regression': LogisticRegression(n_jobs=-1, **best_params['BoW']['Logistic Regression'], verbose=3),
+    'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['BoW']['KNN']),
+    'SVC': SVC(**best_params['BoW']['SVC'], verbose=3),
+    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['BoW']['XGBoost'])
 }
 
 classifiers_word2vec = {
-    'Random Forest': RandomForestClassifier(**best_params['Word2Vec']['Random Forest']),
-    'Logistic Regression': LogisticRegression(**best_params['Word2Vec']['Logistic Regression']),
-    'KNN': KNeighborsClassifier(**best_params['Word2Vec']['KNN']),
-    'SVC': SVC(**best_params['Word2Vec']['SVC']),
-    'XGBoost': XGBClassifier(**best_params['Word2Vec']['XGBoost'])
+    'Random Forest': RandomForestClassifier(n_jobs=-1, **best_params['Word2Vec']['Random Forest'], verbose=3),
+    'Logistic Regression': LogisticRegression(n_jobs=-1, **best_params['Word2Vec']['Logistic Regression'], verbose=3),
+    'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['Word2Vec']['KNN']),
+    'SVC': SVC(**best_params['Word2Vec']['SVC'], verbose=3),
+    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['Word2Vec']['XGBoost'])
 }
 
 # colunas_numericas = {
@@ -304,7 +304,7 @@ def run_and_save_results(clf, X, y, classifier_name, vectorizer, results_df, fea
     }
     
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-    cv_results = cross_validate(clf, X, y, cv=cv, scoring=scorers, return_train_score=False, verbose=3, n_jobs=-1)
+    cv_results = cross_validate(clf, X, y, cv=cv, scoring=scorers, return_train_score=False, verbose=3)
 
     # Preparando os resultados
     features_used = ', '.join(features_useds.columns)
