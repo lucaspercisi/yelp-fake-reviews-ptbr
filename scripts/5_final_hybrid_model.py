@@ -36,12 +36,13 @@ from sklearn.inspection import permutation_importance
 from sklearn.model_selection import train_test_split
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.model_selection import PredefinedSplit
-from scipy.sparse import hstack
+from scipy.sparse import csr_matrix, hstack
 from datetime import datetime
 from sklearn.model_selection import cross_validate
 
 nltk.download('stopwords')
 stop_words_pt = set(stopwords.words('portuguese'))
+stop_words_en = set(stopwords.words('english'))
 
 def clean_text(text):
     # Converter para minúsculas
@@ -56,15 +57,22 @@ def clean_text(text):
 
     return text
 
-def extract_words_from_tagged_content(tagged_content):
-    try:
-        content_list = ast.literal_eval(tagged_content)
-        processed_content = [f'{word.lower()}_{tag}' for word, tag in content_list if word.lower() not in string.punctuation and word.lower() not in stop_words_pt and word.strip() != '']
-        return ' '.join(processed_content)
-    except ValueError:
-        return ""
+def clean_text_en(text):
+    # Converter para minúsculas
+    text = text.lower()
+
+    # Remover pontuações e números
+    text = re.sub(r'[^\w\s]', '', text)
+    text = re.sub(r'\d+', '', text)
+
+    # Remover stopwords
+    text = ' '.join([word for word in text.split() if word not in stop_words_en])
+
+    return text
+
     
-url_dataset = 'https://raw.githubusercontent.com/lucaspercisi/yelp-fake-reviews-ptbr/main/Datasets/portuguese/yelp-fake-reviews-dataset-pt-pos-tagged.csv'
+# url_dataset = 'https://raw.githubusercontent.com/lucaspercisi/yelp-fake-reviews-ptbr/main/Datasets/portuguese/yelp-fake-reviews-dataset-pt-pos-tagged.csv'
+url_dataset = 'https://raw.githubusercontent.com/lucaspercisi/yelp-fake-reviews-ptbr/main/Datasets/english/yelp-fake-reviews-dataset-en.csv'
 yelp_df = pd.read_csv(url_dataset)
 
 # #Contando pontuação
@@ -77,7 +85,7 @@ yelp_df['capital_count'] = yelp_df['content'].apply(lambda x: len([c for c in st
 yelp_df['word_count'] = yelp_df['content'].apply(lambda x: len(str(x).split(" ")))
 
 #limpando conteudo textual
-yelp_df['cleaned_content'] = yelp_df['content'].apply(clean_text)
+yelp_df['cleaned_content'] = yelp_df['content'].apply(clean_text_en)
 
 #limpando conteudo textual com tag gramtical e convertendo para string
 # yelp_df['cleaned_content_tagged'] = yelp_df['content_tagged'].apply(extract_words_from_tagged_content)
@@ -203,27 +211,27 @@ best_params = {
 }
 
 classifiers_tfidf = {
-    'Random Forest': RandomForestClassifier(n_jobs=-1, **best_params['TF-IDF']['Random Forest']),
-    'Logistic Regression': LogisticRegression(**best_params['TF-IDF']['Logistic Regression']),
+    'Random Forest': RandomForestClassifier(n_jobs=-1, **best_params['TF-IDF']['Random Forest']), #REFAZER
+    'Logistic Regression': LogisticRegression(n_jobs=-1, **best_params['TF-IDF']['Logistic Regression']),
     'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['TF-IDF']['KNN']),
-    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['TF-IDF']['XGBoost']),
-    'SVC': SVC(**best_params['TF-IDF']['SVC'])
+    'SVC': SVC(**best_params['TF-IDF']['SVC']),
+    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['TF-IDF']['XGBoost'])
 }
 
 classifiers_bow = {
     'Random Forest': RandomForestClassifier(n_jobs=-1, **best_params['BoW']['Random Forest']),
-    'Logistic Regression': LogisticRegression(**best_params['BoW']['Logistic Regression']),
+    'Logistic Regression': LogisticRegression(n_jobs=-1, **best_params['BoW']['Logistic Regression']),
     'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['BoW']['KNN']),
-    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['BoW']['XGBoost']),
-    'SVC': SVC(**best_params['BoW']['SVC'])
+    'SVC': SVC(**best_params['BoW']['SVC']),
+    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['BoW']['XGBoost'])
 }
 
 classifiers_word2vec = {
     'Random Forest': RandomForestClassifier(n_jobs=-1, **best_params['Word2Vec']['Random Forest']),
-    'Logistic Regression': LogisticRegression(**best_params['Word2Vec']['Logistic Regression']),
+    'Logistic Regression': LogisticRegression(n_jobs=-1, **best_params['Word2Vec']['Logistic Regression']),
     'KNN': KNeighborsClassifier(n_jobs=-1, **best_params['Word2Vec']['KNN']),
-    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['Word2Vec']['XGBoost']),
-    'SVC': SVC(**best_params['Word2Vec']['SVC'])
+    'SVC': SVC(**best_params['Word2Vec']['SVC']),
+    'XGBoost': XGBClassifier(n_jobs=-1, **best_params['Word2Vec']['XGBoost'])
 }
 
 # colunas_numericas = {
@@ -287,8 +295,6 @@ caminho_base = 'C:/Users/lucas/Documents/Projetos/yelp-fake-reviews-ptbr/Results
 # Função para executar o classificador com um número reduzido de features e salvar os resultados
 def run_and_save_results(clf, X, y, classifier_name, vectorizer, results_df, features_useds):
     
-    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-    
     scorers = {
         'accuracy': 'accuracy',
         'precision': 'precision',
@@ -297,12 +303,13 @@ def run_and_save_results(clf, X, y, classifier_name, vectorizer, results_df, fea
         'roc_auc': 'roc_auc'
     }
     
-    cv_results = cross_validate(clf, X, y, cv=cv, scoring=scorers, return_train_score=False, verbose=3)
+    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    cv_results = cross_validate(clf, X, y, cv=cv, scoring=scorers, return_train_score=False, verbose=3, n_jobs=10)
 
     # Preparando os resultados
     features_used = ', '.join(features_useds.columns)
     results = {
-        'scenario' : 'pt_equal',
+            'scenario' : 'en_equal',
         'classifier': classifier_name,
         'vectorizer': vectorizer,
         'features_used': features_used,
@@ -332,7 +339,7 @@ def run_and_save_results(clf, X, y, classifier_name, vectorizer, results_df, fea
     updated_results_df = pd.concat([results_df, pd.DataFrame([results])], axis=0, ignore_index=True)
 
     agora = datetime.now().strftime("%Y%m%d_%H%M%S")
-    nome_arquivo = f"{caminho_base}/resultados_pt_equal_{agora}.csv"
+    nome_arquivo = f"{caminho_base}/resultados_en_equal_{agora}.csv"
     
     updated_results_df.to_csv(nome_arquivo, index=False)
     
@@ -353,11 +360,12 @@ for vect_name, classifier_dict in {'TF-IDF': classifiers_tfidf, 'BoW': classifie
         # Converte as colunas de X_numeric para float, garantindo que são todas numéricas
         if X_numeric is not None:
             X_numeric = X_numeric.astype(float)
-        
+            X_numeric_sparse = csr_matrix(X_numeric)
+            
         X_text = vectorizer.fit_transform(X)
         
         # Agora, combina X_text (matriz esparsa) com X_numeric (numpy array)
-        X_combined = hstack((X_text, X_numeric)) if X_numeric is not None else X_text
+        X_combined = hstack([X_text, X_numeric_sparse]) if X_numeric is not None else X_text
 
 
         # Transformando o texto e concatenando com as features numéricas
@@ -406,7 +414,7 @@ for clf_name, classifier in classifiers_word2vec.items():
     # Escolhendo as features numéricas apropriadas
     colunas_a_incluir = colunas_numericas_full.get(clf_name, [])
     X_numeric = yelp_df_sample[colunas_a_incluir].values if colunas_a_incluir else None
-    X_combined = np.hstack((X_transformed, X_numeric)) if X_numeric is not None else X_transformed
+    X_combined = hstack((X_transformed, X_numeric)) if X_numeric is not None else X_transformed
 
     # Executando o classificador e salvando os resultados
     features_used = pd.DataFrame(X_numeric, columns=colunas_a_incluir)
