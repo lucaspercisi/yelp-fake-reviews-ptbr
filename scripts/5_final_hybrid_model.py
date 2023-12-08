@@ -71,8 +71,8 @@ def clean_text_en(text):
     return text
 
     
-url_dataset = 'https://raw.githubusercontent.com/lucaspercisi/yelp-fake-reviews-ptbr/main/Datasets/portuguese/yelp-fake-reviews-dataset-pt-pos-tagged.csv'
-# url_dataset = 'https://raw.githubusercontent.com/lucaspercisi/yelp-fake-reviews-ptbr/main/Datasets/english/yelp-fake-reviews-dataset-en.csv'
+# url_dataset = 'https://raw.githubusercontent.com/lucaspercisi/yelp-fake-reviews-ptbr/main/Datasets/portuguese/yelp-fake-reviews-dataset-pt-pos-tagged.csv'
+url_dataset = 'https://raw.githubusercontent.com/lucaspercisi/yelp-fake-reviews-ptbr/main/Datasets/english/yelp-fake-reviews-dataset-en.csv'
 yelp_df = pd.read_csv(url_dataset)
 
 # #Contando pontuação
@@ -85,7 +85,7 @@ yelp_df['capital_count'] = yelp_df['content'].apply(lambda x: len([c for c in st
 yelp_df['word_count'] = yelp_df['content'].apply(lambda x: len(str(x).split(" ")))
 
 #limpando conteudo textual
-yelp_df['cleaned_content'] = yelp_df['content'].apply(clean_text)
+yelp_df['cleaned_content'] = yelp_df['content'].apply(clean_text_en)
 
 #limpando conteudo textual com tag gramtical e convertendo para string
 # yelp_df['cleaned_content_tagged'] = yelp_df['content_tagged'].apply(extract_words_from_tagged_content)
@@ -98,16 +98,17 @@ df_verdadeiros = yelp_df[yelp_df['fake_review'] == False]
 # Contando o número de registros em cada classe
 num_falsos = df_falsos.shape[0]
 num_verdadeiros = df_verdadeiros.shape[0]
-
+num_falsos = 3387
+num_verdadeiros = 3387
 # Amostrando aleatoriamente da classe com mais registros
-if num_falsos > num_verdadeiros:
-    df_falsos = df_falsos.sample(num_verdadeiros, random_state=42)
-else:
-    df_verdadeiros = df_verdadeiros.sample(num_falsos, random_state=42)
+# if num_falsos > num_verdadeiros:
+df_falsos = df_falsos.sample(num_falsos, random_state=42)
+# else:
+df_verdadeiros = df_verdadeiros.sample(num_verdadeiros, random_state=42)
 
 yelp_df_balanceado = pd.concat([df_falsos, df_verdadeiros])
-# yelp_df_sample = yelp_df_balanceado.copy()
-yelp_df_sample = yelp_df.copy()
+yelp_df_sample = yelp_df_balanceado.copy()
+# yelp_df_sample = yelp_df.copy()
 
 
 X = yelp_df_sample['cleaned_content']
@@ -290,7 +291,7 @@ def run_and_save_results(clf, X, y, classifier_name, vectorizer, results_df, fea
     # Preparando os resultados
     features_used = ', '.join(features_useds.columns)
     results = {
-        'scenario' : 'pt_non_equal',
+        'scenario' : 'en_equal_pt',
         'classifier': classifier_name,
         'vectorizer': vectorizer,
         'features_used': features_used,
@@ -320,7 +321,7 @@ def run_and_save_results(clf, X, y, classifier_name, vectorizer, results_df, fea
     updated_results_df = pd.concat([results_df, pd.DataFrame([results])], axis=0, ignore_index=True)
 
     agora = datetime.now().strftime("%Y%m%d_%H%M%S")
-    nome_arquivo = f"{caminho_base}/resultados_pt_non_equal_{agora}_final_certo.csv"
+    nome_arquivo = f"{caminho_base}/resultados_en_equal_pt_{agora}_final_certo.csv"
     
     updated_results_df.to_csv(nome_arquivo, index=False)
     
@@ -330,30 +331,25 @@ for vect_name, classifier_dict in {'TF-IDF': classifiers_tfidf, 'BoW': classifie
     for clf_name, classifier in classifier_dict.items():
         print(f"Iniciando -> {vect_name}, {clf_name}")
 
-        # Configurando o vetorizador
+
         ngram_range = best_ngrams_full[f'{vect_name}_{clf_name}']
         vectorizer = TfidfVectorizer(ngram_range=ngram_range) if vect_name == 'TF-IDF' else CountVectorizer(ngram_range=ngram_range)
 
-        # Escolhendo as features numéricas apropriadas
+
         colunas_a_incluir = colunas_numericas_full.get(clf_name, [])
         X_numeric = yelp_df_sample[colunas_a_incluir].values if colunas_a_incluir else None
         
-        # Converte as colunas de X_numeric para float, garantindo que são todas numéricas
+
         if X_numeric is not None:
             X_numeric = X_numeric.astype(float)
             X_numeric_sparse = csr_matrix(X_numeric)
             
         X_text = vectorizer.fit_transform(X)
         
-        # Agora, combina X_text (matriz esparsa) com X_numeric (numpy array)
+
         X_combined = hstack([X_text, X_numeric_sparse]) if X_numeric is not None else X_text
 
 
-        # Transformando o texto e concatenando com as features numéricas
-
-        # X_combined = hstack((X_text, X_numeric)) if X_numeric is not None else X_text
-
-        # Executando o classificador e salvando os resultados
         features_used = pd.DataFrame(X_numeric, columns=colunas_a_incluir)
         results_df_global = run_and_save_results(classifier, X_combined, y, clf_name, vect_name, results_df_global, features_used)
 
@@ -361,7 +357,6 @@ for vect_name, classifier_dict in {'TF-IDF': classifiers_tfidf, 'BoW': classifie
         print(f"F1 Score para {vect_name} e {clf_name}: {f1_score_atual}")
 
 
-# Função para processar o texto e treinar o modelo Word2Vec
 class Word2VecVectorizer(BaseEstimator, TransformerMixin):
     def __init__(self, vector_size=100, window=5, min_count=1):
         self.vector_size = vector_size
