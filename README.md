@@ -1,37 +1,36 @@
-# Detecção de Avaliações Falsas em Português Utilizando Aprendizado de Máquina
+# Detection of Fake Reviews in Portuguese Using Machine Learning
 
-## Sobre o Projeto
-Este projeto foca na detecção de avaliações falsas (fake reviews) em plataformas de avaliação online, especificamente em português. Utilizamos técnicas avançadas de aprendizado de máquina, processamento de linguagem natural e análise de dados para identificar padrões e características que distinguem avaliações autênticas das fraudulentas.
+## About the Project
+This project focuses on detecting fake reviews on online review platforms, specifically in Portuguese. We use advanced techniques in machine learning, natural language processing, and data analysis to identify patterns and characteristics that distinguish genuine reviews from fraudulent ones.
 
-### Contexto
-Avaliações online têm um papel significativo na influência das decisões de compra dos consumidores. No entanto, o surgimento de avaliações falsas pode distorcer a percepção do consumidor e prejudicar a integridade das plataformas online. Este projeto visa abordar essa questão no contexto do idioma português, que é menos explorado na literatura científica sobre o tema.
+### Context
+Online reviews play a significant role in influencing consumers' purchasing decisions. However, the emergence of fake reviews can distort consumer perception and undermine the integrity of online platforms. This project aims to address this issue in the context of the Portuguese language, which is less explored in the scientific literature on the subject.
 
-### Objetivo
-O objetivo principal deste projeto é desenvolver e avaliar modelos de aprendizado de máquina que possam identificar eficientemente avaliações falsas em português, contribuindo para a integridade e confiabilidade de plataformas online.
+### Objective
+The main objective of this project is to develop and evaluate machine learning models that can efficiently identify fake reviews in Portuguese, contributing to the integrity and reliability of online platforms.
 
 ## Dataset
-O dataset utilizado neste projeto foi coletado do site [Yelp](https://www.yelp.com/), focando em avaliações de bares e restaurantes no Brasil e em Portugal. 
+The dataset used in this project was collected from the [Yelp](https://www.yelp.com/) website, focusing on reviews of bars and restaurants in Brazil and Portugal.
 
-### Estrutura do Dataset
-O dataset inclui várias características, como conteúdo da avaliação, dados comportamentais dos usuários e metafeatures extraídas do texto das avaliações.
+### Dataset Structure
+The dataset includes various features, such as review content, user behavioral data, and meta-features extracted from the review text.
 
-## Metodologia
-- **Coleta de Dados:** Utilizamos técnicas de web scraping para coletar avaliações.
-- **Pré-processamento:** Limpeza e organização dos dados, incluindo a remoção de stopwords, lematização e POS-tagging.
-- **Extração de Características:** Exploração de características textuais e comportamentais.
-- **Modelagem:** Implementação e teste de vários modelos de aprendizado de máquina, incluindo Random Forest, SVC, XGBoost, entre outros.
-- **Validação Cruzada:** Utilização de validação cruzada de 5 folds para avaliar os modelos.
+## Methodology
+- **Data Collection:** We used web scraping techniques to collect reviews.
+- **Preprocessing:** Cleaning and organizing the data, including removing stopwords, lemmatization, and POS-tagging.
+- **Feature Extraction:** Exploration of textual and behavioral features.
+- **Modeling:** Implementation and testing of various machine learning models, including Random Forest, SVC, XGBoost, among others.
+- **Cross-Validation:** Using 5-fold cross-validation to evaluate the models.
 
-## Resultados
-Os resultados mostram a eficácia dos modelos na distinção entre avaliações verdadeiras e falsas, com análises detalhadas disponíveis no repositório.
+## Results
+The results demonstrate the effectiveness of the models in distinguishing between genuine and fake reviews, with detailed analyses available in the repository.
 
-## Contribuições
-Contribuições são sempre bem-vindas! Se você tem sugestões para melhorar este projeto, sinta-se à vontade para abrir um pull request ou uma issue.
+## Contributions
+Contributions are always welcome! If you have suggestions to improve this project, feel free to open a pull request or an issue.
 
-## Contato
+## Contact
 - **Lucas Percisi** - lucas_percisi@hotmail.com.br
 
 ---
 
-Link para o Repositório: [https://github.com/lucaspercisi/yelp-fake-reviews-ptbr](https://github.com/lucaspercisi/yelp-fake-reviews-ptbr)
-
+Repository Link: [https://github.com/lucaspercisi/yelp-fake-reviews-ptbr](https://github.com/lucaspercisi/yelp-fake-reviews-ptbr)
