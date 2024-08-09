@@ -5,13 +5,6 @@ Created on Fri Nov 24 00:45:23 2023
 @author: lucas
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Nov 23 23:36:55 2023
-
-@author: lucas
-"""
-
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV, StratifiedKFold, cross_val_score
 from gensim.models import Word2Vec
@@ -383,7 +376,6 @@ w2v_vect = Word2VecVectorizer(vector_size=100, window=5, min_count=1)
 w2v_vect.fit(X)
 X_transformed = w2v_vect.transform(X)
 
-# Para Word2Vec, combinando com features numéricas
 for clf_name, classifier in classifiers_word2vec.items():
     print(f"Iniciando Word2Vec, {clf_name}")
 
