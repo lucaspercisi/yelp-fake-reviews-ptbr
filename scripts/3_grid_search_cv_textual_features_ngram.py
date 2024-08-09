@@ -122,9 +122,6 @@ for vect_name, vectorizer in vectorizers.items():
         }
 
         grid_search = GridSearchCV(pipeline, params, cv=cv, scoring=make_scorer(f1_score), verbose=3)
-
-        # Ajuste do GridSearchCV ao seu conjunto de dados textual
-        # Substitua X_text e y pelos seus dados
         grid_search.fit(X, y)
 
         best_params = grid_search.best_params_
