@@ -68,7 +68,7 @@ yelp_df = pd.read_csv(url_dataset)
 #limpando conteudo textual
 yelp_df['cleaned_content'] = yelp_df['content'].apply(clean_text)
 
-# Pré-processamento (ajuste conforme necessário)
+# Pré-processamento
 # df['processed_content'] = df['content'].apply(preprocess_function)
 
 # Vetorização
