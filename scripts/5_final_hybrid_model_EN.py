@@ -5,20 +5,6 @@ Created on Sat Nov 25 11:17:38 2023
 @author: lucas
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Nov 24 00:45:23 2023
-
-@author: lucas
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Nov 23 23:36:55 2023
-
-@author: lucas
-"""
-
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV, StratifiedKFold, cross_val_score
 from gensim.models import Word2Vec
@@ -248,7 +234,6 @@ results_df_global = pd.DataFrame(columns=[
 #     'f1_score': make_scorer(f1_score)
 # }
 
-# Caminho base para salvar os arquivos CSV
 caminho_base = 'C:/Users/lucas/Documents/Projetos/yelp-fake-reviews-ptbr/Results/spyder'
 
 # Função para executar o classificador com um número reduzido de features e salvar os resultados
@@ -303,7 +288,7 @@ def run_and_save_results(clf, X, y, classifier_name, vectorizer, results_df, fea
     
     return updated_results_df
 
-# Função para adicionar resultados ao CSV com nome de arquivo dinâmico
+
 def adicionar_ao_csv(dados, caminho_base, vetorizador, classificador):
     # Obtendo a data e hora atuais
     agora = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -321,7 +306,6 @@ def adicionar_ao_csv(dados, caminho_base, vetorizador, classificador):
         
 #         vectorizer = TfidfVectorizer(ngram_range=ngram_range) if vect_name == 'TF-IDF' else CountVectorizer(ngram_range=ngram_range)
 
-#         # Escolhendo as features numéricas apropriadas
 #         colunas_a_incluir = colunas_numericas.get(clf_name, [])
 #         X_numeric = yelp_df_sample[colunas_a_incluir].values if colunas_a_incluir else None
 
