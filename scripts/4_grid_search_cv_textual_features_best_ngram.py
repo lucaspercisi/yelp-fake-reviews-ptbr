@@ -5,12 +5,6 @@ Created on Fri Nov 24 00:45:23 2023
 @author: lucas
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Nov 23 23:36:55 2023
-
-@author: lucas
-"""
 
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV, StratifiedKFold, cross_val_score
@@ -181,7 +175,6 @@ for vect_name in ['TF-IDF', 'BoW']:
         # Selecionando o ngram_range com base no vetorizador e classificador
         ngram_range = best_ngrams_full[f'{vect_name}_{clf_name}']
 
-        # Escolhendo o vetorizador apropriado
         if vect_name == 'TF-IDF':
             vectorizer = TfidfVectorizer(ngram_range=ngram_range)
         else:  # BoW
@@ -193,7 +186,6 @@ for vect_name in ['TF-IDF', 'BoW']:
             ('classifier', classifiers_params[clf_name]['classifier'])
         ])
 
-        # Configurando e executando o GridSearchCV
         grid_search = GridSearchCV(pipeline, classifiers_params[clf_name]['params'], cv=cv, scoring=make_scorer(f1_score), verbose=3)
         grid_search.fit(X, y)
 
@@ -244,9 +236,7 @@ for clf_name, data in classifiers_params.items():
     classifier = data['classifier']
     grid_search = GridSearchCV(classifier, data['params'], cv=cv, scoring=make_scorer(f1_score), verbose=3)
 
-    # Ajuste do GridSearchCV ao conjunto de dados transformados pelo Word2Vec
     grid_search.fit(X_transformed, y)
 
-    # Exibindo os melhores parâmetros e o melhor score F1
     print(f"Classificador: {clf_name}, Melhores parâmetros: {grid_search.best_params_}, Melhor F1 score: {grid_search.best_score_} com Word2Vec")
 
