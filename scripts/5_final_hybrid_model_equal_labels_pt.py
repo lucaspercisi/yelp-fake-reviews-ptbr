@@ -5,20 +5,6 @@ Created on Sat Nov 25 17:19:50 2023
 @author: lucas
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Nov 24 00:45:23 2023
-
-@author: lucas
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Nov 23 23:36:55 2023
-
-@author: lucas
-"""
-
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV, StratifiedKFold, cross_val_score
 from gensim.models import Word2Vec
