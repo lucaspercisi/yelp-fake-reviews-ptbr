@@ -9,11 +9,15 @@ Online reviews play a significant role in influencing consumers' purchasing deci
 ### Objective
 The main objective of this project is to develop and evaluate machine learning models that can efficiently identify fake reviews in Portuguese, contributing to the integrity and reliability of online platforms.
 
+---
+
 ## Dataset
 The dataset used in this project was collected from the [Yelp](https://www.yelp.com/) website, focusing on reviews of bars and restaurants in Brazil and Portugal.
 
 ### Dataset Structure
 The dataset includes various features, such as review content, user behavioral data, and meta-features extracted from the review text.
+
+---
 
 ## Methodology
 - **Data Collection:** We used web scraping techniques to collect reviews.
@@ -22,11 +26,30 @@ The dataset includes various features, such as review content, user behavioral d
 - **Modeling:** Implementation and testing of various machine learning models, including Random Forest, SVC, XGBoost, among others.
 - **Cross-Validation:** Using 5-fold cross-validation to evaluate the models.
 
+---
+
+## Hardware and Software Configurations
+The experiments were conducted on the following system configuration:
+- **Processor:** AMD Ryzen 5 2600 with six cores and twelve threads, base frequency of 3.4 GHz.
+- **Memory:** 24 GB DDR4 RAM, dual-channel mode.
+- **Software Environment:**
+  - Anaconda (version 2.5.1)
+  - Spyder Integrated Development Environment (IDE) version 5.4.3
+  - Python version 3.11.5
+
+Detailed replication instructions and additional configuration files are provided in the repository.
+
+---
+
 ## Results
-The results demonstrate the effectiveness of the models in distinguishing between genuine and fake reviews, with detailed analyses available in the repository.
+The results demonstrate the effectiveness of the models in distinguishing between genuine and fake reviews, with detailed analyses available in the repository. Highlights include the integration of textual and behavioral features, which significantly enhanced classification accuracy.
+
+---
 
 ## Contributions
 Contributions are always welcome! If you have suggestions to improve this project, feel free to open a pull request or an issue.
+
+---
 
 ## Contact
 - **Lucas Percisi** - lucas_percisi@hotmail.com.br
